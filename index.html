@@ -442,14 +442,51 @@ async function startFirebase(cfg){
   let unsub=[];
   auth.onAuthStateChanged(u=>{
     unsub.forEach(f=>f());unsub=[];
-    if(!u){S.user=null;BK=null;S.despesas=[];S.extrato=[];S.plano=null;S.modo="login";S.fase="login";setBadge("b-gray","Desconectado");$("#sairBtn").hidden=true;setStatus("","");renderShell();return}
+    if(!u){AI=null;IMG=false;AI_STATE="indisponivel";S.user=null;BK=null;S.despesas=[];S.extrato=[];S.plano=null;S.modo="login";S.fase="login";setBadge("b-gray","Desconectado");$("#sairBtn").hidden=true;setStatus("","");renderShell();return}
     S.user=u;$("#sairBtn").hidden=false;
+    if(window.FIREBASE_IA_URL){AI=criarIAFirebase(window.FIREBASE_IA_URL,u);IMG=true;AI_STATE="ok"}
     const col=c=>{const r=fs.collection("users").doc(u.uid).collection(c);return{onSnapshot:(a,b)=>{const f=r.onSnapshot(a,b);unsub.push(f);return f}}};
     const ref=c=>fs.collection("users").doc(u.uid).collection(c);
     BK={nome:"firebase",set:(c,id,obj)=>ref(c).doc(id).set(obj),del:(c,id)=>ref(c).doc(id).delete()};
     S.modo="firebase";S.fase="carregando";setBadge("b-ok","Salvo na nuvem");renderShell();
     assinarColecoes(col,e=>{setBadge("b-bad","Sem acesso");setStatus("bad",e&&e.code==="permission-denied"?"O Firestore negou acesso. Confira se as regras do arquivo firestore.rules foram publicadas no Firebase.":"Erro no banco ("+esc(e&&e.code)+").")});
   });
+}
+/* IA fora do Claude: função HTTP no Google Cloud (functions/index.js), chamada com o token do login. */
+async function prepararImagem(file){
+  const bmp=await createImageBitmap(file);const max=2000;const k=Math.min(1,max/Math.max(bmp.width,bmp.height));
+  const c=document.createElement("canvas");c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);
+  c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
+  const blob=await new Promise(ok=>c.toBlob(ok,"image/jpeg",0.88));
+  const buf=new Uint8Array(await blob.arrayBuffer());let bin="";for(let i=0;i<buf.length;i+=32768)bin+=String.fromCharCode.apply(null,buf.subarray(i,i+32768));
+  return{mediaType:"image/jpeg",data:btoa(bin)};
+}
+function lerJSONTolerante(t){
+  try{return JSON.parse(t)}catch(_){}
+  const f=t.match(/```(?:json)?\s*([\s\S]*?)```/);if(f){try{return JSON.parse(f[1])}catch(_){}}
+  const i=t.search(/[\[{]/),j=Math.max(t.lastIndexOf("}"),t.lastIndexOf("]"));
+  if(i>=0&&j>i){try{return JSON.parse(t.slice(i,j+1))}catch(_){}}
+  throw{code:"invalid_json",text:t};
+}
+function criarIAFirebase(url,user){
+  const COD={nao_autenticado:"session_expired",limite:"rate_limited",recusado:"refused"};
+  const chamar=async(input,opts)=>{
+    opts=opts||{};
+    const messages=typeof input==="string"?[{role:"user",content:input}]:input;
+    let imgs=[];
+    if(opts.images){const lista=opts.images instanceof Blob?[opts.images]:Array.from(opts.images);imgs=await Promise.all(lista.map(prepararImagem))}
+    let r;
+    try{r=await fetch(url,{method:"POST",signal:opts.signal,headers:{"Content-Type":"application/json",Authorization:"Bearer "+await user.getIdToken()},body:JSON.stringify({messages,images:imgs})})}
+    catch(e){if(e&&e.name==="AbortError")throw{code:"cancelled"};throw{code:"upstream_error",message:"Sem conexão com a função de IA."}}
+    let d=null;try{d=await r.json()}catch(_){}
+    if(!r.ok)throw{code:COD[d&&d.erro]||"ia_"+(d&&d.erro||r.status),message:d&&d.mensagem||("A função de IA respondeu "+r.status+".")};
+    if(opts.onText)opts.onText({text:d.text,delta:d.text});
+    return{text:d.text,truncated:!!d.truncated};
+  };
+  const ai=(input,opts)=>chamar(input,opts);
+  ai.json=async(input,opts)=>{const {text}=await chamar(typeof input==="string"?input+"\n\nResponda somente com o objeto JSON, sem texto antes ou depois.":input,opts);return lerJSONTolerante(text)};
+  ai.limits=async()=>({images:{maxCount:4}});
+  return ai;
 }
 async function entrarGoogle(){
   const p=new firebase.auth.GoogleAuthProvider();p.setCustomParameters({prompt:"select_account"});
@@ -670,7 +707,7 @@ function lerTextoLocal(txt){
 }
 const s0=v=>v==null?null:(String(v).trim()||null);
 const ERRO_IA={not_granted:"Você não autorizou o uso do Claude nesta página.",sampling_disabled:"O Claude não está disponível para esta conta.",rate_limited:"Muitas leituras seguidas ou limite de uso atingido. Espere e tente de novo.",image_rejected:"A imagem não foi aceita. Use JPG, PNG ou WebP.",images_unavailable:"Esta visualização não envia imagens ao Claude.",invalid_json:"A resposta veio fora do formato. Tente de novo.",refused:"O Claude recusou esta leitura.",session_expired:"Sua sessão expirou. Entre de novo.",upstream_error:"Falha de conexão com o Claude. Tente de novo."};
-const msgErro=e=>ERRO_IA[e&&e.code]||("Falha na leitura ("+(e&&e.code||"erro")+").");
+const msgErro=e=>ERRO_IA[e&&e.code]||(e&&e.message)||("Falha na leitura ("+(e&&e.code||"erro")+").");
 
 /* ================= RASCUNHOS (cartões de confirmação) ================= */
 let drafts=[],fileSel=null,docAlvo=null;
@@ -719,7 +756,7 @@ async function enviarEntrada(){
   const txt=$("#entrada").value.trim();const file=fileSel;
   if(!txt&&!file){toast("Escreva o gasto ou anexe uma foto.");return}
   if(!file&&/\?\s*$/.test(txt)&&!/\d/.test(txt)){location.hash="#assistente";setTimeout(()=>{const c=$("#chatIn");if(c){c.value=txt;c.focus()}},50);$("#entrada").value="";return}
-  if(file&&!AI){toast("Leitura de foto só funciona com o Claude.");return}
+  if(file&&!AI){toast("Leitura de foto precisa da IA. Configure a função de IA ou use o app dentro do Claude.");return}
   const dr={id:uid(),status:"lendo",origem:file?"foto":"texto",texto:txt,arquivo:file?file.name:null,alvo:docAlvo,ctl:new AbortController(),local:!AI};
   drafts.unshift(dr);$("#entrada").value="";fileSel=null;docAlvo=null;$("#foto").value="";renderFileChip();renderDrafts();
   try{
@@ -1078,7 +1115,7 @@ REGRAS:
 DOCUMENTOS EXIGIDOS: material de consumo e serviço PJ: nota fiscal + comprovante de pagamento. Serviço PF: Recibo de Serviços de Terceiros Pessoa Física + comprovante. Diária: Recibo de Diária + comprovante. Passagem aérea: bilhete eletrônico, fatura da agência ou companhia e comprovante de embarque. Equipamento: nota fiscal, comprovante e termo de incorporação ao patrimônio. Recomendado (não obrigatório): três orçamentos para equipamentos e serviços.`;
 }
 function viewAssist(){
-  if(!AI)return `<section class="block"><h2>Assistente</h2><div class="empty"><b>O assistente usa o Claude</b><span>${AI_STATE==="carregando"?"Carregando o Claude…":"Fora do Claude não há IA disponível. Saldos, validações e alertas continuam funcionando aqui."}</span></div></section>`;
+  if(!AI)return `<section class="block"><h2>Assistente</h2><div class="empty"><b>O assistente usa o Claude</b><span>${AI_STATE==="carregando"?"Carregando o Claude…":"A IA ainda não foi configurada neste endereço (função de IA do Firebase). Saldos, validações e alertas continuam funcionando."}</span></div></section>`;
   return `<section class="block"><div class="sec-head"><h2>Assistente</h2><span class="hint">responde com base no orçamento, nos saldos e nas regras; não grava nada</span></div>
   <div class="chat" id="chatLog">${chat.length?chat.map(m=>`<div class="msg ${m.role==="user"?"u":"a"}">${esc(m.content)}</div>`).join(""):`<div class="empty"><b>Pergunte, por exemplo:</b><div class="row">${["Posso comprar uma impressora?","Posso pagar o almoço da equipe em campo?","Quanto ainda tenho de diárias?"].map(q=>`<button class="btn sm" data-act="perg" data-v="${esc(q)}">${esc(q)}</button>`).join("")}</div></div>`}
   ${chatBusy?`<div class="msg a" id="chatPend"><span class="spinner"></span> Pensando…</div>`:""}</div>

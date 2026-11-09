@@ -1,0 +1,12 @@
+{
+  "name": "presta-conta-ia",
+  "private": true,
+  "description": "Função HTTP que lê texto e imagens com o Claude para o app de prestação de contas.",
+  "main": "index.js",
+  "engines": { "node": "22" },
+  "dependencies": {
+    "@anthropic-ai/sdk": "1.3.0",
+    "@google-cloud/functions-framework": "5.0.5",
+    "firebase-admin": "14.5.0"
+  }
+}

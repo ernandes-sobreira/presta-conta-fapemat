@@ -1,3 +1,4 @@
+node_modules/
 plano-de-trabalho*.json
 backup-prestacao-*.json
 relacao-despesas-*.csv
