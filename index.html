@@ -3,295 +3,339 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
 <style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
 <body>
-<title>Contas Transforma-ações</title>
+<title>Painel de Prestação</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: coluna única de 880px; entrada fixa no topo do fluxo, abas fixas, conteúdo abaixo. Tema claro único, por pedido do usuário. */
+/* Layout: app de uma coluna (max 960px); cabeçalho com saldo em destaque, entrada rápida, conteúdo por abas; no celular, barra de navegação inferior. Tema claro único, por pedido do usuário. */
 :root{
   color-scheme: light;
-  --bg:#ffffff; --ink:#17202a; --muted:#5a6570; --line:#e2e6ea; --soft:#f4f6f8;
-  --accent:#17506b; --accent-soft:#e6eff4;
-  --ok:#1d7a4b; --ok-bg:#e7f4ec;
-  --warn:#94620a; --warn-bg:#fff4d6; --warn-bar:#e5ac2f;
-  --bad:#b0281f; --bad-bg:#fcebe9;
-  --gray:#5d656e; --gray-bg:#eceff2; --gray-bar:#9aa3ad;
-  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  --f-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
-  --r:8px;
+  --bg:#ffffff; --ink:#101828; --muted:#5d6b82; --line:#e8ebf2; --soft:#f5f7fb;
+  --brand:#ff4f2e; --brand2:#ffa21f; --brand-soft:#fff1ec;
+  --ok:#0fa968; --ok-bg:#e3f8ee; --warn:#e98a00; --warn-bg:#fff4dc; --bad:#ec3a2f; --bad-bg:#ffe9e7; --gray:#7a869a; --gray-bg:#eef1f6;
+  --c-diarias:#2f6bff; --c-consumo:#10b981; --c-passagens:#06aed4; --c-servpf:#f59e0b; --c-servpj:#ec4899; --c-equip:#7c4dff;
+  --f-disp:"Bricolage Grotesque","Manrope",system-ui,sans-serif;
+  --f-body:"Manrope",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 8px 24px -12px rgba(16,24,40,.18);
 }
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
-.wrap{max-width:880px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-h1,h2,h3{text-wrap:balance;margin:0;font-weight:600}
-h1{font-size:1.45rem;letter-spacing:-.01em}
-h2{font-size:1.1rem}
-h3{font-size:.95rem}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+.wrap{max-width:960px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-disp);text-wrap:balance;margin:0;letter-spacing:-.015em}
+h1{font-size:1.5rem;font-weight:800} h2{font-size:1.25rem;font-weight:700} h3{font-size:1rem;font-weight:700}
 p{margin:0}
-.eyebrow{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
-.muted{color:var(--muted)}
-.small{font-size:.85rem}
-.num{font-family:var(--f-num);font-variant-numeric:tabular-nums;white-space:nowrap}
+.eyebrow{font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.muted{color:var(--muted)} .small{font-size:.85rem}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:700}
 .right{text-align:right}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+:focus-visible{outline:3px solid var(--brand2);outline-offset:2px}
 .stack{display:flex;flex-direction:column;gap:12px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ico{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hide{display:none!important}
 
-/* topo */
-.top{padding-block:24px 14px;border-bottom:1px solid var(--line)}
-.top .wrap{display:flex;flex-direction:column;gap:6px}
-.top .meta{font-size:.85rem;color:var(--muted)}
-.banner{border-radius:var(--r);padding:10px 12px;font-size:.88rem}
-.banner.warn{background:var(--warn-bg);color:#5c3d05}
-.banner.bad{background:var(--bad-bg);color:var(--bad)}
-.banner.info{background:var(--accent-soft);color:var(--accent)}
+.appbar{padding-block:14px 10px}
+.appbar .wrap{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.appbar .wrap+.wrap{display:block}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;display:grid;place-items:center;font-family:var(--f-disp);font-weight:800;font-size:1rem;flex:none;box-shadow:0 6px 16px -6px var(--brand)}
+.brand-txt{min-width:0}
+.brand-txt b{font-family:var(--f-disp);font-size:1.05rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand-txt span{font-size:.75rem;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 10px;font-size:.75rem;font-weight:700;white-space:nowrap}
+.badge::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.b-ok{background:var(--ok-bg);color:var(--ok)} .b-warn{background:var(--warn-bg);color:#a35f00} .b-bad{background:var(--bad-bg);color:var(--bad)} .b-gray{background:var(--gray-bg);color:var(--gray)}
+.banner{border-radius:12px;padding:12px 14px;font-size:.88rem;margin-top:10px}
+.banner.warn{background:var(--warn-bg);color:#6b4100} .banner.bad{background:var(--bad-bg);color:#8f1d16} .banner.info{background:var(--soft);color:var(--muted)}
 
-/* entrada */
-.entry{padding-block:16px}
-.entry-box{border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
-.entry-box:focus-within{border-color:var(--accent)}
-.entry textarea{border:0;resize:vertical;min-height:52px;outline:none;width:100%;background:transparent}
+.hero{border-radius:24px;padding:22px;background:linear-gradient(125deg,#ff4f2e 0%,#ff7a1f 55%,#ffb21f 100%);color:#fff;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;box-shadow:0 18px 40px -22px rgba(255,79,46,.75);position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.12);pointer-events:none}
+.hero .eyebrow{color:rgba(255,255,255,.88)}
+.hero .big{font-family:var(--f-disp);font-size:clamp(2rem,7vw,3rem);font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.hero .sub{font-size:.85rem;opacity:.92}
+.hero-stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.hero-stat{background:rgba(255,255,255,.18);border-radius:12px;padding:8px 12px}
+.hero-stat small{display:block;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;opacity:.92}
+.hero-stat b{font-variant-numeric:tabular-nums;font-size:1rem}
+.ring{width:118px;height:118px;position:relative;z-index:1}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .lbl{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-family:var(--f-disp);font-weight:800;font-size:1.5rem;line-height:1}
+.ring .lbl small{display:block;font-family:var(--f-body);font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.92;margin-top:3px}
+@media (max-width:560px){.hero{grid-template-columns:1fr;padding:18px}.ring{position:absolute;right:14px;top:14px;width:76px;height:76px}.ring .lbl{font-size:1rem}.ring .lbl small{font-size:.55rem}}
+
+.entry{padding-block:16px 4px}
+.entry-box{border:2px solid var(--line);border-radius:20px;padding:12px;display:flex;flex-direction:column;gap:10px;background:var(--bg);box-shadow:var(--shadow);transition:border-color .2s}
+.entry-box:focus-within{border-color:var(--brand)}
+.entry textarea{border:0;resize:vertical;min-height:56px;outline:none;width:100%;background:transparent;font-size:1rem}
 .entry .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
-.chip{display:inline-flex;align-items:center;gap:6px;background:var(--soft);border-radius:999px;padding:4px 10px;font-size:.82rem;max-width:100%}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--brand-soft);color:#b8321a;border-radius:999px;padding:5px 12px;font-size:.82rem;font-weight:600;max-width:100%}
 .chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
-.btn{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 14px;font-weight:500;min-height:40px}
-.btn:hover{background:var(--soft)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn.primary:hover{filter:brightness(1.08)}
-.btn.danger{color:var(--bad);border-color:#efc4bf}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid var(--line);background:var(--bg);border-radius:12px;padding:9px 16px;font-weight:700;min-height:44px;transition:transform .12s,background .15s,box-shadow .15s}
+.btn:hover{background:var(--soft)} .btn:active{transform:scale(.97)}
+.btn.primary{background:linear-gradient(135deg,var(--brand),#ff6a24);border-color:transparent;color:#fff;box-shadow:0 8px 18px -8px var(--brand)}
+.btn.primary:hover{filter:brightness(1.05)}
+.btn.cam{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.cam:hover{background:#273248}
+.btn.danger{color:var(--bad);border-color:#f7c3be}
 .btn.ghost{border-color:transparent;background:transparent}
-.btn.sm{padding:4px 10px;min-height:32px;font-size:.85rem}
+.btn.sm{padding:5px 12px;min-height:34px;font-size:.84rem;border-radius:10px}
 .btn:disabled{opacity:.5;cursor:default}
-.linkbtn{background:none;border:0;color:var(--accent);padding:0;text-decoration:underline;text-underline-offset:2px}
+.linkbtn{background:none;border:0;color:var(--brand);padding:0;font-weight:700;text-decoration:underline;text-underline-offset:3px}
 .hint{font-size:.8rem;color:var(--muted)}
 
-/* abas */
-.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
-.tabs .wrap{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
-.tabs a{padding:12px 12px 10px;color:var(--muted);text-decoration:none;font-weight:500;border-bottom:2px solid transparent;white-space:nowrap;font-size:.92rem}
-.tabs a[aria-current="page"]{color:var(--ink);border-color:var(--accent)}
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);margin-top:14px}
+.tabs .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-block:8px}
+.tabs a{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;color:var(--muted);text-decoration:none;font-weight:700;border-radius:12px;white-space:nowrap;font-size:.92rem;transition:background .15s,color .15s}
+.tabs a:hover{background:var(--soft);color:var(--ink)}
+.tabs a[aria-current="page"]{background:var(--ink);color:#fff}
+@media (max-width:720px){
+  .tabs{position:fixed;top:auto;bottom:0;left:0;right:0;margin:0;border-top:1px solid var(--line);border-bottom:0;padding-bottom:env(safe-area-inset-bottom,0px)}
+  .tabs .wrap{justify-content:space-around;padding-block:6px;gap:0}
+  .tabs a{flex-direction:column;gap:2px;font-size:.66rem;padding:6px 4px;border-radius:10px;min-width:58px}
+  .tabs a[aria-current="page"]{background:var(--brand-soft);color:var(--brand)}
+  main{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))!important}
+  .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
+}
 main{padding-block:22px 64px}
-section.block{display:flex;flex-direction:column;gap:14px;margin-bottom:34px}
+section.block{display:flex;flex-direction:column;gap:14px;margin-bottom:30px}
 .sec-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
 
-/* números do painel */
-.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.kpi{background:var(--bg);padding:14px 14px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
-.kpi .v{font-family:var(--f-num);font-size:1.25rem;font-variant-numeric:tabular-nums;font-weight:500}
-.kpi .s{font-size:.78rem;color:var(--muted)}
-@media (max-width:560px){.kpis{grid-template-columns:1fr}.kpi{flex-direction:row;justify-content:space-between;align-items:baseline;flex-wrap:wrap}}
-
-.states{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-@media (max-width:560px){.states{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.state{border-radius:10px;padding:10px 12px;text-align:left;border:0;display:flex;flex-direction:column;gap:2px}
-.state b{font-family:var(--f-num);font-size:1.3rem;font-weight:500}
-.state span{font-size:.8rem}
-.st-pendente{background:var(--warn-bg);color:#6b4706}
-.st-comprovada{background:var(--ok-bg);color:var(--ok)}
-.st-irregular{background:var(--bad-bg);color:var(--bad)}
-.st-fapemat{background:var(--gray-bg);color:var(--gray)}
-
-.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 9px;font-size:.75rem;font-weight:500;white-space:nowrap}
+.states{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.states{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.state{border-radius:18px;padding:14px;text-align:left;border:0;display:flex;flex-direction:column;gap:6px;transition:transform .15s,box-shadow .15s}
+.state:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.state .top{display:flex;justify-content:space-between;align-items:center}
+.state b{font-family:var(--f-disp);font-size:2rem;font-weight:800;line-height:1}
+.state span{font-size:.8rem;font-weight:700}
+.state .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.7)}
+.st-pendente{background:var(--warn-bg);color:#8a5200}
+.st-comprovada{background:var(--ok-bg);color:#077a4b}
+.st-irregular{background:var(--bad-bg);color:#b8241b}
+.st-fapemat{background:var(--gray-bg);color:#4d586b}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:.74rem;font-weight:700;white-space:nowrap}
 .pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
 
-/* barras */
-.bars{display:flex;flex-direction:column;gap:18px}
-.bar-row{display:flex;flex-direction:column;gap:6px}
-.bar-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}
-.bar{height:10px;border-radius:5px;background:var(--soft);display:flex;overflow:hidden}
-.bar i{display:block;height:100%}
-.bar .g{background:var(--ok)} .bar .p{background:var(--warn-bar)} .bar .x{background:var(--bad)} .bar .c{background:var(--gray-bar)}
-.bar-legend{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;font-size:.78rem;color:var(--muted)}
-.bar-legend div{display:flex;flex-direction:column}
-.bar-legend .num{color:var(--ink);font-size:.82rem}
-@media (max-width:560px){.bar-legend{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:baseline}
+.deadline{border-radius:20px;padding:18px;background:var(--ink);color:#fff;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+.deadline .eyebrow{color:#aab4c5}
+.deadline .days{font-family:var(--f-disp);font-size:3rem;font-weight:800;line-height:1;color:var(--brand2);font-variant-numeric:tabular-nums}
+.deadline .days small{display:block;font-size:.8rem;color:#d7deea;font-family:var(--f-body);font-weight:600;text-align:right}
+.timeline{grid-column:1/-1;display:flex;flex-direction:column;gap:6px}
+.track{height:8px;background:rgba(255,255,255,.14);border-radius:4px;overflow:hidden}
+.track i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2));border-radius:4px;transform-origin:left}
+.dl-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media (max-width:560px){.dl-list{grid-template-columns:1fr}}
+.dl{border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.dl b{font-family:var(--f-disp);font-size:1.2rem;white-space:nowrap}
+.dl.vencido{opacity:.55}
+.dl.urg b{color:var(--bad)}
 
-.deadline{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:14px;flex-wrap:wrap}
-.deadline .days{font-family:var(--f-num);font-size:1.6rem;font-weight:500;color:var(--accent)}
-.dl-list{display:flex;flex-direction:column}
-.dl-list div{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:.88rem;flex-wrap:wrap}
+.rub-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.rub-grid{grid-template-columns:1fr}}
+.rub{border-radius:18px;border:1.5px solid var(--line);padding:16px 16px 16px 22px;display:flex;flex-direction:column;gap:10px;background:var(--bg);position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}
+.rub:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.rub::before{content:"";position:absolute;inset:0 auto 0 0;width:6px;background:var(--c)}
+.rub .tag{align-self:flex-start;font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--c);background:color-mix(in srgb,var(--c) 12%,white);padding:3px 8px;border-radius:6px}
+.rub .avail{font-family:var(--f-disp);font-size:1.6rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.rub .avail.neg{color:var(--bad)}
+.bar{height:12px;border-radius:6px;background:var(--soft);display:flex;overflow:hidden}
+.bar i{display:block;height:100%;transform-origin:left}
+.anim .bar i,.anim .track i,.anim .mini i{animation:grow .9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.bar .g{background:var(--ok)} .bar .p{background:var(--warn)} .bar .x{background:var(--bad)}
+.legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;font-size:.74rem;color:var(--muted)}
+.legend div{display:flex;flex-direction:column}
+.legend .num{color:var(--ink);font-size:.84rem}
+.dot{display:inline-block;width:8px;height:8px;border-radius:3px;margin-right:5px}
 
-/* lista */
-.filters{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:8px}
-@media (max-width:560px){.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}}
-select,input[type=text],input[type=date],input[type=number],input:not([type]),textarea.f{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg);min-height:40px;width:100%;min-width:0}
-textarea.f{min-height:64px;resize:vertical}
-.list{border-top:1px solid var(--line)}
-.item{border-bottom:1px solid var(--line)}
-.item-head{display:grid;grid-template-columns:4px 1fr auto;gap:12px;padding:12px 0;width:100%;text-align:left;background:none;border:0;align-items:start}
-.item-head .stripe{align-self:stretch;border-radius:2px}
-.item-head .main{min-width:0;display:flex;flex-direction:column;gap:2px}
-.item-head .title{font-weight:500;overflow-wrap:anywhere}
-.item-head .sub{font-size:.8rem;color:var(--muted)}
-.item-head .val{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
-.missing{font-size:.8rem;color:#6b4706}
+.filters{display:grid;grid-template-columns:1fr 1.4fr;gap:8px}
+@media (max-width:560px){.filters{grid-template-columns:1fr}}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.fchip{border:1.5px solid var(--line);background:var(--bg);border-radius:999px;padding:6px 12px;font-size:.8rem;font-weight:700;color:var(--muted)}
+.fchip[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:#fff}
+select,input[type=text],input[type=date],input:not([type]),textarea.f{border:1.5px solid var(--line);border-radius:12px;padding:9px 12px;background:var(--bg);min-height:44px;width:100%;min-width:0;transition:border-color .15s}
+select:focus,input:focus,textarea.f:focus{border-color:var(--brand);outline:none}
+textarea.f{min-height:70px;resize:vertical}
+.list{display:flex;flex-direction:column;gap:10px}
+.item{border:1.5px solid var(--line);border-radius:16px;overflow:hidden;background:var(--bg);transition:box-shadow .15s}
+.item:hover{box-shadow:var(--shadow)}
+.item.irr{border-color:#f7c3be}
+.item-head{display:grid;grid-template-columns:auto 1fr auto;gap:12px;padding:14px;width:100%;text-align:left;background:none;border:0;align-items:start}
+.item-head .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#fff;font-family:var(--f-disp);font-weight:800;font-size:.85rem}
+.item-head .main{min-width:0;display:flex;flex-direction:column;gap:3px}
+.item-head .title{font-weight:700;overflow-wrap:anywhere}
+.item-head .sub{font-size:.78rem;color:var(--muted)}
+.item-head .val{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.item-head .val .num{font-size:1.02rem}
+@media (max-width:480px){.item-head{grid-template-columns:auto 1fr}.item-head .val{grid-column:2;flex-direction:row;justify-content:space-between;align-items:center}}
+.missing{font-size:.78rem;color:#8a5200;font-weight:600}
 .missing.bad{color:var(--bad)}
-.detail{padding:4px 0 18px 16px;display:flex;flex-direction:column;gap:14px}
-@media (max-width:560px){.detail{padding-left:0}}
+.detail{padding:14px 14px 18px;display:flex;flex-direction:column;gap:14px;border-top:1.5px dashed var(--line)}
 
-.alert{border-radius:8px;padding:10px 12px;font-size:.88rem;display:flex;flex-direction:column;gap:6px}
-.alert.bad{background:var(--bad-bg);color:#7d1b14}
-.alert.gray{background:var(--gray-bg);color:#3c434a}
-.alert.warn{background:var(--warn-bg);color:#5c3d05}
-.alert.ok{background:var(--ok-bg);color:#14583a}
-.alert b{font-weight:600}
-.alert .norma{font-size:.75rem;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
-
+.alert{border-radius:12px;padding:12px 14px;font-size:.88rem;display:flex;flex-direction:column;gap:6px}
+.alert.bad{background:var(--bad-bg);color:#7d1712} .alert.gray{background:var(--gray-bg);color:#384152} .alert.warn{background:var(--warn-bg);color:#5e3a00} .alert.ok{background:var(--ok-bg);color:#0b5a39}
+.alert b{font-weight:700}
+.alert .norma{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;font-weight:800}
 .docs{display:flex;flex-direction:column;gap:6px}
-.doc{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 10px;border-radius:8px;background:var(--soft);font-size:.86rem;flex-wrap:wrap}
-.doc.missing-doc{background:var(--warn-bg)}
-.doc.opt{background:var(--bg);border:1px dashed var(--line)}
+.doc{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--ok-bg);color:#0b5a39;font-size:.86rem;flex-wrap:wrap;font-weight:600}
+.doc.missing-doc{background:var(--warn-bg);color:#6b4100}
+.doc.opt{background:var(--bg);color:var(--muted);border:1.5px dashed var(--line)}
 
-/* formulários */
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .grid .full{grid-column:1/-1}
 @media (max-width:560px){.grid{grid-template-columns:1fr}}
-.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
-.fld>span{font-size:.78rem;color:var(--muted);font-weight:500}
-.fld.vazio input,.fld.vazio select,.fld.vazio textarea{border-color:var(--warn-bar);background:var(--warn-bg)}
+.fld{display:flex;flex-direction:column;gap:5px;min-width:0}
+.fld>span{font-size:.76rem;color:var(--muted);font-weight:700}
+.fld.vazio input,.fld.vazio select,.fld.vazio textarea{border-color:var(--warn);background:var(--warn-bg)}
 .fld.vazio>span::after{content:" · não lido, preencha";color:var(--warn)}
 .editform .fld.vazio>span::after{content:" · preencha"}
-.hide{display:none!important}
 .check{display:flex;gap:8px;align-items:flex-start;font-size:.88rem}
-.check input{margin-top:4px;min-height:auto;width:auto}
+.check input{margin-top:4px;min-height:auto;width:auto;accent-color:var(--brand)}
 fieldset{border:0;padding:0;margin:0;min-width:0}
 fieldset[inert] input,fieldset[inert] select,fieldset[inert] textarea{border-color:transparent;background:var(--soft);appearance:none}
 
-/* cartões de revisão */
 #drafts{display:flex;flex-direction:column;gap:14px}
-.card{border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:14px;background:var(--bg)}
-.card.draft{border-color:var(--accent);box-shadow:0 1px 0 var(--accent-soft),0 6px 20px -12px rgba(23,80,107,.35)}
-.card-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
-.quote{font-size:.88rem;color:var(--muted);border-left:3px solid var(--line);padding-left:10px;overflow-wrap:anywhere}
+.card{border:1.5px solid var(--line);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:14px;background:var(--bg)}
+.card.draft{border:2px solid var(--brand);box-shadow:0 14px 34px -18px rgba(255,79,46,.55);animation:pop .35s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes pop{from{transform:translateY(8px) scale(.98);opacity:.4}}
+.card-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.quote{font-size:.9rem;color:var(--muted);border-left:4px solid var(--brand2);padding-left:10px;overflow-wrap:anywhere}
 .card-foot{display:flex;gap:8px;flex-wrap:wrap}
 .choices{display:flex;flex-direction:column;gap:6px}
-.choice{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:.88rem}
-.choice input{margin-top:4px}
+.choice{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;font-size:.88rem}
+.choice:has(input:checked){border-color:var(--brand);background:var(--brand-soft)}
+.choice input{margin-top:4px;accent-color:var(--brand)}
 .scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table{border-collapse:collapse;width:100%;font-size:.85rem}
 th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-th{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+th{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:800}
 td.r,th.r{text-align:right}
-.ext td input,.ext td select{min-height:34px;padding:4px 6px;font-size:.84rem}
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--accent-soft);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px}
+.ext td input,.ext td select{min-height:36px;padding:4px 8px;font-size:.84rem;border-radius:8px}
+.spinner{display:inline-block;width:16px;height:16px;border:2.5px solid var(--brand-soft);border-top-color:var(--brand);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-3px}
 @keyframes spin{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){.spinner{animation:none}}
 
-/* orçamento */
-.budget{display:flex;flex-direction:column}
-.b-row{display:grid;grid-template-columns:1fr 112px 112px 112px;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:.88rem;align-items:baseline}
-.b-row.h{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
-.b-row .q{font-size:.76rem;color:var(--muted)}
+.budget{display:flex;flex-direction:column;border:1.5px solid var(--line);border-radius:16px;overflow:hidden}
+.b-row{display:grid;grid-template-columns:1fr 112px 112px 112px;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line);font-size:.88rem;align-items:center}
+.b-row:last-child{border-bottom:0}
+.b-row.h{font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:800;background:var(--soft)}
+.b-row .q{font-size:.75rem;color:var(--muted)}
 .b-row .neg{color:var(--bad)}
-@media (max-width:560px){.b-row{grid-template-columns:1fr 1fr}.b-row>div:first-child{grid-column:1/-1}.b-row.h{display:none}.b-row .lbl{display:inline;font-size:.7rem;color:var(--muted);margin-right:4px}}
+.mini{height:5px;border-radius:3px;background:var(--soft);margin-top:6px;overflow:hidden}
+.mini i{display:block;height:100%;background:var(--c);transform-origin:left}
+@media (max-width:560px){.b-row{grid-template-columns:1fr 1fr 1fr}.b-row>div:first-child{grid-column:1/-1}.b-row.h{display:none}.b-row .lbl{display:block;font-size:.66rem;color:var(--muted);font-weight:700}}
 @media (min-width:561px){.b-row .lbl{display:none}}
 
-/* chat */
 .chat{display:flex;flex-direction:column;gap:12px}
-.msg{max-width:88%;padding:10px 12px;border-radius:12px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.92rem}
-.msg.u{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:4px}
-.msg.a{align-self:flex-start;background:var(--soft);border-bottom-left-radius:4px}
+.msg{max-width:88%;padding:11px 14px;border-radius:18px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.92rem}
+.msg.u{align-self:flex-end;background:linear-gradient(135deg,var(--brand),#ff6a24);color:#fff;border-bottom-right-radius:6px}
+.msg.a{align-self:flex-start;background:var(--soft);border-bottom-left-radius:6px}
 .composer{display:flex;gap:8px;align-items:flex-end}
 .composer textarea{flex:1}
 
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--ink);color:#fff;padding:10px 14px;border-radius:10px;font-size:.88rem;max-width:min(92vw,560px);z-index:20;box-shadow:0 8px 24px rgba(0,0,0,.18)}
-.empty{padding:28px 0;color:var(--muted);font-size:.92rem;display:flex;flex-direction:column;gap:6px}
-.kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;font-size:.88rem}
-.kv dt{color:var(--muted)} .kv dd{margin:0;overflow-wrap:anywhere}
+.gate{display:grid;place-items:center;padding-block:28px}
+.gate .card{max-width:460px;width:100%;gap:16px;box-shadow:var(--shadow)}
+.gate .logo{width:56px;height:56px;border-radius:16px;font-size:1.4rem}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:#fff;padding:12px 16px;border-radius:14px;font-size:.88rem;font-weight:600;max-width:min(92vw,560px);z-index:40;box-shadow:0 12px 30px rgba(16,24,40,.3)}
+.empty{padding:22px;color:var(--muted);font-size:.92rem;display:flex;flex-direction:column;gap:8px;border:2px dashed var(--line);border-radius:18px;align-items:flex-start}
+.empty b{color:var(--ink);font-family:var(--f-disp);font-size:1.05rem}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
-<header class="top">
+<header class="appbar">
   <div class="wrap">
-    <span class="eyebrow">FAPEMAT-PRO.0002209/2025 · RN FAPEMAT 008/2021</span>
-    <h1>Transforma-ações: prestação de contas</h1>
-    <p class="meta">Ernandes Sobreira Oliveira Junior · UNEMAT Cáceres · vigência 19/11/2025 a 18/11/2027</p>
-    <div id="storeStatus" class="banner info" role="status">Conectando ao armazenamento…</div>
+    <div class="brand"><div class="logo" aria-hidden="true">PC</div><div class="brand-txt"><b id="brandNome">Prestação de contas</b><span id="brandSub">FAPEMAT</span></div></div>
+    <div class="row" style="flex-wrap:nowrap"><span id="storeBadge" class="badge b-gray">Conectando</span><button id="sairBtn" class="btn sm ghost" data-act="sair" hidden>Sair</button></div>
   </div>
+  <div class="wrap"><div id="storeStatus" class="banner info" role="status" hidden></div></div>
 </header>
 
+<div id="appArea" hidden>
 <section class="entry">
   <div class="wrap stack">
+    <div id="heroSlot"></div>
     <form id="entryForm" class="entry-box" autocomplete="off">
       <label for="entrada" class="eyebrow">Registrar gasto ou documento</label>
-      <textarea id="entrada" rows="2" placeholder="Ex.: paguei 302,50 de diária para Cuiabá dia 12/03/2026 — ou anexe a foto de uma nota, recibo, bilhete ou extrato"></textarea>
+      <textarea id="entrada" rows="2" placeholder="Ex.: paguei 302,50 de diária para Cuiabá dia 12/03/2026"></textarea>
       <div id="fileChip" hidden></div>
       <div class="actions">
         <div class="row">
-          <label class="btn" id="attachBtn" for="foto">Anexar foto</label>
+          <label class="btn cam" id="attachBtn" for="foto" hidden><svg class="ico" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg>Foto</label>
           <input id="foto" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
         </div>
-        <button class="btn primary" id="sendBtn" type="submit">Registrar</button>
+        <button class="btn primary" id="sendBtn" type="submit">Registrar<svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
       </div>
     </form>
-    <p class="hint" id="aiHint">A IA lê o texto ou a foto e mostra os campos para você conferir. Nada é gravado sem o seu Confirmar.</p>
+    <p class="hint" id="aiHint"></p>
     <div id="drafts"></div>
   </div>
 </section>
-
 <nav class="tabs" aria-label="Seções">
   <div class="wrap" id="tabs">
-    <a href="#painel" data-tab="painel">Painel</a>
-    <a href="#lancamentos" data-tab="lancamentos">Lançamentos</a>
-    <a href="#orcamento" data-tab="orcamento">Orçamento</a>
-    <a href="#assistente" data-tab="assistente">Assistente</a>
-    <a href="#exportar" data-tab="exportar">Exportar e backup</a>
+    <a href="#painel" data-tab="painel"><svg class="ico" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Painel</a>
+    <a href="#lancamentos" data-tab="lancamentos"><svg class="ico" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>Lançamentos</a>
+    <a href="#orcamento" data-tab="orcamento"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18M16 15h2"/></svg>Orçamento</a>
+    <a href="#assistente" data-tab="assistente"><svg class="ico" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>Assistente</a>
+    <a href="#exportar" data-tab="exportar"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>Exportar</a>
   </div>
 </nav>
-<main><div class="wrap" id="view"></div></main>
+</div>
+<main><div class="wrap" id="view"><div class="empty"><span><span class="spinner"></span> Carregando…</span></div></div></main>
 <div id="toast" class="toast" hidden role="status"></div>
 
+<script src="firebase-config.js"></script>
 <script>
 "use strict";
-/* ================= DADOS DO PROJETO (aprovados, não editar) ================= */
-const PROJ={nome:"Transforma-ações: Integrando Saberes para ações sustentáveis",processo:"FAPEMAT-PRO.0002209/2025",edital:"Contrapartida Chamada CAPES 03/2024 PROEXT-PG",coord:"Ernandes Sobreira Oliveira Junior",inst:"UNEMAT Cáceres",vigIni:"2025-11-19",vigFim:"2027-11-18",norma:"Resolução Normativa FAPEMAT 008/2021",total:23970000,custeio:21850000,capital:2120000};
-const RUBRICAS=[
- {id:"diarias",nome:"Diárias",natureza:"custeio",aprovado:5193650},
- {id:"consumo",nome:"Material de consumo",natureza:"custeio",aprovado:9106350},
- {id:"passagens",nome:"Passagens",natureza:"custeio",aprovado:650000},
- {id:"servpf",nome:"Serviços de terceiros pessoa física",natureza:"custeio",aprovado:2700000},
- {id:"servpj",nome:"Serviços de terceiros pessoa jurídica",natureza:"custeio",aprovado:4200000},
- {id:"equip",nome:"Equipamentos e material permanente",natureza:"capital",aprovado:2120000}];
-const RUB=Object.fromEntries(RUBRICAS.map(r=>[r.id,r]));
-const ITENS=[];
-const addI=(rubrica,id,nome,qtd,unid,unit,extra)=>ITENS.push(Object.assign({rubrica,id,nome,qtd,unid,unit,total:Math.round(qtd*unit)},extra||{}));
-[["cuiaba","Cuiabá",55,"MT"],["sinop","Sinop",22,"MT"],["tangara","Tangará da Serra",26,"MT"],["xavantina","Nova Xavantina",26,"MT"],["barra","Barra do Bugres",11,"MT"],["brasilia","Brasília",5.5,"DF"],["saopaulo","São Paulo",11,"SP"]]
- .forEach(([k,n,q,uf])=>addI("diarias","d-"+k,"Diárias — "+n,q,"diária",uf==="MT"?30250:58100,{destino:n,uf}));
-addI("passagens","p-brasilia","Passagem Cuiabá–Brasília–Cuiabá",2,"passagem",175000,{destino:"Brasília"});
-addI("passagens","p-saopaulo","Passagem Cuiabá–São Paulo–Cuiabá",2,"passagem",150000,{destino:"São Paulo"});
-[["tintas","Tintas",50,"un",3000],["pinceis","Pincéis diversos",50,"un",2500],["paletas","Paletas plásticas",20,"un",1500],["aventais","Aventais reutilizáveis",30,"un",2000],["copos","Copos biodegradáveis",1000,"un",250],["lapiscor","Lápis de cor",50,"caixa",2000],["cola","Cola branca",10,"un",1000],["tesouras","Tesouras",10,"un",1500],["fitacrepe","Fita crepe",10,"un",1500],["telas","Tela para pintura",100,"un",5500],["barbante","Barbante",5,"un",2000],["sacolixo","Saco de lixo",20,"kg",1550],["tecido","Tecido para pinturas",100,"m",2000],["papelcartao","Papel cartão",100,"un",250],["papelhig","Papel higiênico",10,"un",800],["borracha","Borracha",20,"un",250],["grampeador","Grampeador pneumático",1,"un",35000],["grampos","Grampo para grampeador pneumático",5,"un",5000],["fitametrica","Fita métrica",10,"un",600],["reguas","Réguas",50,"un",350],["extensoes","Extensões e filtros de linha",10,"un",3500],["lapis","Lápis",20,"un",175],["marcador","Marcador de quadro branco",30,"un",1500],["sabao","Sabão líquido",5,"un",2080],["caneta","Caneta",1,"un",14950],["generica","Material de consumo (linha genérica, sem especificação)",1,"un",6480000,{generica:true}],["combustivel","Combustível",1000,"L",650],["resmas","Resmas",50,"un",4000]]
- .forEach(([k,n,q,u,v,x])=>addI("consumo","c-"+k,n,q,u,v,x));
-addI("servpf","s-diagramacao","Diagramação editorial",1,"serviço",1000000);
-addI("servpf","s-edicao","Edição de materiais",1,"serviço",1000000);
-addI("servpf","s-auxiliar","Auxiliar de campo",1,"serviço",700000);
-addI("servpj","s-producao","Produção de materiais",1,"serviço",2000000);
-addI("servpj","s-impressao","Impressão de materiais",1,"serviço",2200000);
-addI("equip","e-notebook","Notebook Samsung Galaxy Book4",2,"un",500000);
-addI("equip","e-desktop","Desktop Dell 24 All in One",1,"un",700000);
-addI("equip","e-som","Aparelho de som Frahm CMF 670 com microfone sem fio e tripé",1,"un",300000);
-addI("equip","e-caixa","Caixa ativa 12 polegadas com microfone",1,"un",120000);
-const ITEM=Object.fromEntries(ITENS.map(i=>[i.id,i]));
-const EQUIPE=["Ernandes Sobreira Oliveira Junior","Danielle Tavares Teixeira","Wilkinson Lopes Lazaro","Sandra Mara Alves da Silva Neves","Leila Nalis Paiva da Silva Andrade","Adriano Marcos Romano","Beatriz Ferraz Buhler","Renato Fonseca de Arruda","Jonathan Anderson de Paula Caldas","Aurea Regina Alves Ignacio","Everton Ricardo do Nascimento"];
-const PRAZOS=[["2026-11-19","Relatório técnico parcial"],["2027-09-19","Limite para pedir remanejamento ou prorrogação"],["2027-11-18","Fim da vigência"],["2027-12-19","Prestação de contas técnica e financeira final"]];
+/* ================= PLANO DE TRABALHO (carregado do banco, nunca embutido no código) ================= */
+let PROJ=null,RUBRICAS=[],RUB={},ITENS=[],ITEM={},EQUIPE=[],PRAZOS=[];
+function validarPlano(p){
+  const e=[];
+  if(!p||p.formato!=="plano-fapemat-v1"){e.push("formato não reconhecido (esperado plano-fapemat-v1)");return e}
+  const P=p.projeto||{};
+  ["nome","processo","coordenador","vigenciaInicio","vigenciaFim","totalCentavos","custeioCentavos","capitalCentavos","diariaDentroUfCentavos","diariaForaUfCentavos"].forEach(k=>{if(P[k]==null||P[k]==="")e.push("projeto."+k+" ausente")});
+  if(!Array.isArray(p.rubricas)||!p.rubricas.length)e.push("rubricas ausentes");
+  if(!Array.isArray(p.itens)||!p.itens.length)e.push("itens ausentes");
+  else p.itens.forEach(i=>{if(!i.id||!i.rubrica||!(i.quantidade>0)||!(i.unitarioCentavos>=0))e.push("item inválido: "+(i.nome||i.id))});
+  return e;
+}
+function aplicarPlano(p){
+  const P=p.projeto;
+  PROJ={nome:P.nome,nomeCurto:P.nomeCurto||P.nome,processo:P.processo,edital:P.edital||"",coord:P.coordenador,inst:P.instituicao||"",sede:P.sede||"",vigIni:P.vigenciaInicio,vigFim:P.vigenciaFim,norma:P.norma||"Resolução Normativa FAPEMAT 008/2021",total:P.totalCentavos,custeio:P.custeioCentavos,capital:P.capitalCentavos,diariaDentro:P.diariaDentroUfCentavos,diariaFora:P.diariaForaUfCentavos,uf:P.ufSede||"MT"};
+  RUBRICAS=p.rubricas.map(r=>({id:r.id,nome:r.nome,natureza:r.natureza,aprovado:r.aprovadoCentavos}));
+  RUB=Object.fromEntries(RUBRICAS.map(r=>[r.id,r]));
+  ITENS=p.itens.map(i=>({rubrica:i.rubrica,id:i.id,nome:i.nome,qtd:i.quantidade,unid:i.unidade||"",unit:i.unitarioCentavos,total:Math.round(i.quantidade*i.unitarioCentavos),destino:i.destino,uf:i.uf,generica:!!i.generica}));
+  ITEM=Object.fromEntries(ITENS.map(i=>[i.id,i]));
+  EQUIPE=p.equipe||[];
+  PRAZOS=(p.prazos||[]).map(x=>[x.data,x.nome]).sort((a,b)=>a[0].localeCompare(b[0]));
+  document.getElementById("brandNome").textContent=PROJ.nomeCurto;
+  document.getElementById("brandSub").textContent=PROJ.processo;
+}
+const COR_RUB={diarias:"var(--c-diarias)",consumo:"var(--c-consumo)",passagens:"var(--c-passagens)",servpf:"var(--c-servpf)",servpj:"var(--c-servpj)",equip:"var(--c-equip)"};
+const corRub=id=>COR_RUB[id]||"var(--gray)";
 const TIPOS={
- consumo:{nome:"Material de consumo",rubrica:"consumo",natureza:"custeio",docs:["nf","comprovante"]},
- servico_pj:{nome:"Serviço de pessoa jurídica",rubrica:"servpj",natureza:"custeio",docs:["nf","comprovante"],orc:true,servico:true},
- servico_pf:{nome:"Serviço de pessoa física",rubrica:"servpf",natureza:"custeio",docs:["recibo_pf","comprovante"],orc:true,servico:true},
- diaria:{nome:"Diária",rubrica:"diarias",natureza:"custeio",docs:["recibo_diaria","comprovante"]},
- passagem:{nome:"Passagem aérea",rubrica:"passagens",natureza:"custeio",docs:["bilhete","fatura","embarque"]},
- equipamento:{nome:"Equipamento / material permanente",rubrica:"equip",natureza:"capital",docs:["nf","comprovante","termo"],orc:true},
- taxa_bancaria:{nome:"Taxa bancária da conta do projeto",rubrica:null,natureza:"custeio",docs:["extrato"]}};
-const DOCS={nf:"Nota fiscal",comprovante:"Comprovante de pagamento",recibo_pf:"Recibo de Serviços de Terceiros Pessoa Física",recibo_diaria:"Recibo de Diária",bilhete:"Bilhete eletrônico",fatura:"Fatura da agência ou companhia",embarque:"Comprovante de embarque",termo:"Termo de incorporação ao patrimônio da UNEMAT",orcamento:"Orçamento (cotação)",extrato:"Lançamento no extrato da conta do projeto",outro:"Outro documento"};
+ consumo:{nome:"Material de consumo",sigla:"MC",rubrica:"consumo",natureza:"custeio",docs:["nf","comprovante"]},
+ servico_pj:{nome:"Serviço de pessoa jurídica",sigla:"PJ",rubrica:"servpj",natureza:"custeio",docs:["nf","comprovante"],orc:true,servico:true},
+ servico_pf:{nome:"Serviço de pessoa física",sigla:"PF",rubrica:"servpf",natureza:"custeio",docs:["recibo_pf","comprovante"],orc:true,servico:true},
+ diaria:{nome:"Diária",sigla:"DI",rubrica:"diarias",natureza:"custeio",docs:["recibo_diaria","comprovante"]},
+ passagem:{nome:"Passagem aérea",sigla:"PA",rubrica:"passagens",natureza:"custeio",docs:["bilhete","fatura","embarque"]},
+ equipamento:{nome:"Equipamento / material permanente",sigla:"EQ",rubrica:"equip",natureza:"capital",docs:["nf","comprovante","termo"],orc:true},
+ taxa_bancaria:{nome:"Taxa bancária da conta do projeto",sigla:"TB",rubrica:null,natureza:"custeio",docs:["extrato"]}};
+const DOCS={nf:"Nota fiscal",comprovante:"Comprovante de pagamento",recibo_pf:"Recibo de Serviços de Terceiros Pessoa Física",recibo_diaria:"Recibo de Diária",bilhete:"Bilhete eletrônico",fatura:"Fatura da agência ou companhia",embarque:"Comprovante de embarque",termo:"Termo de incorporação ao patrimônio",orcamento:"Orçamento (cotação)",extrato:"Lançamento no extrato da conta do projeto",outro:"Outro documento"};
 const FORMAS={pix:"Pix",transferencia:"Transferência",boleto:"Boleto",cartao:"Cartão",cheque:"Cheque",saque:"Saque em dinheiro"};
 const ESTADOS={pendente:"Pendente de comprovação",comprovada:"Comprovada",irregular:"Irregular",fapemat:"A confirmar com a FAPEMAT"};
-const EST_COR={pendente:"var(--warn-bar)",comprovada:"var(--ok)",irregular:"var(--bad)",fapemat:"var(--gray-bar)"};
+const ICO={
+ pendente:'<path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="9"/>',
+ comprovada:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+ irregular:'<path d="M15 9l-6 6M9 9l6 6"/><circle cx="12" cy="12" r="9"/>',
+ fapemat:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"/>'};
+const ico=(k,s)=>`<svg class="ico" viewBox="0 0 24 24"${s?` style="width:${s}px;height:${s}px"`:""}>${ICO[k]}</svg>`;
 
 /* ================= UTILITÁRIOS ================= */
 const $=s=>document.querySelector(s);
@@ -306,9 +350,9 @@ const pad=n=>String(n).padStart(2,"0");
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 const fmtData=iso=>iso?iso.split("-").reverse().join("/"):"sem data";
 const hojeISO=()=>{const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`};
-const diasEntre=(a,b)=>Math.round((Date.UTC(...b.split("-").map((x,i)=>i===1?x-1:+x))-Date.UTC(...a.split("-").map((x,i)=>i===1?x-1:+x)))/864e5);
+const isoUTC=s=>{const[y,m,d]=s.split("-").map(Number);return Date.UTC(y,m-1,d)};
+const diasEntre=(a,b)=>Math.round((isoUTC(b)-isoUTC(a))/864e5);
 const fmtQtd=q=>q==null?"":String(q).replace(".",",");
-
 function parseValor(t){
   if(t==null||t==="")return null;
   if(typeof t==="number")return isFinite(t)?Math.round(t*100):null;
@@ -339,51 +383,93 @@ function parseData(t){
 }
 function toast(msg,ms){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,ms||4200)}
 
-/* ================= ARMAZENAMENTO ================= */
-const S={despesas:[],extrato:[],perfil:{},modo:"carregando",pronto:false};
-let DB=null,AI=null,IMG=false,DL=null,AI_STATE="carregando";
-const LSKEY="fapemat-pro-0002209-2025-v1";
+/* ================= ARMAZENAMENTO =================
+   (1) Dentro do Claude: banco do artifact. (2) Fora dele, com firebase-config.js: Firestore com login Google,
+   dados em users/{uid}/... (as regras em firestore.rules só deixam cada conta ler e gravar a própria pasta).
+   (3) Sem nada disso: navegador (localStorage), com aviso. */
+const S={despesas:[],extrato:[],perfil:{},plano:null,modo:"carregando",fase:"carregando",user:null};
+let BK=null,AI=null,IMG=false,DL=null,AI_STATE="carregando",FB=null;
+const LSKEY="prestacao-fapemat-v2";
 const writeQ=new Map();
-function lsLoad(){try{const raw=localStorage.getItem(LSKEY);if(raw){const o=JSON.parse(raw);S.despesas=o.despesas||[];S.extrato=o.extrato||[];S.perfil=o.perfil||{}}return true}catch(e){return false}}
-function lsSave(){try{localStorage.setItem(LSKEY,JSON.stringify({despesas:S.despesas,extrato:S.extrato,perfil:S.perfil}));return true}catch(e){return false}}
-function setStatus(kind,html){const el=$("#storeStatus");el.className="banner "+kind;el.innerHTML=html;el.hidden=!html}
-function startLocal(motivo){
-  if(S.modo==="db")return;
-  const ok=lsLoad();const ok2=ok&&lsSave();
-  S.modo=ok2?"local":"memoria";S.pronto=true;
-  setStatus(ok2?"warn":"bad",(ok2?"<b>Armazenamento persistente indisponível.</b> "+esc(motivo)+" Os dados ficam só neste navegador e podem ser apagados com a limpeza do navegador. ":"<b>Sem armazenamento.</b> "+esc(motivo)+" Os dados existem só enquanto esta página estiver aberta. ")+'Exporte o backup JSON com frequência em <a href="#exportar">Exportar e backup</a>.');
-  renderAll();
+function setBadge(cls,txt){const b=$("#storeBadge");b.className="badge "+cls;b.textContent=txt}
+function setStatus(kind,html){const el=$("#storeStatus");el.className="banner "+(kind||"info");el.innerHTML=html||"";el.hidden=!html}
+function aplicarConfig(docs){
+  const per=docs.find(d=>d.id==="perfil"),pl=docs.find(d=>d.id==="plano");
+  S.perfil=per||{};
+  if(pl&&pl.plano&&!validarPlano(pl.plano).length){if(S.plano!==pl.plano){S.plano=pl.plano;aplicarPlano(pl.plano)}}else S.plano=null;
 }
-function startDb(db){
-  DB=db;S.modo="db";
-  let got={d:false,e:false,p:false};
-  const timer=setTimeout(()=>{if(!S.pronto)setStatus("warn","O armazenamento ainda não respondeu. Os dados podem demorar a aparecer; não cadastre em duplicidade.")},10000);
-  const done=(k,meta)=>{got[k]=true;if(got.d&&got.e&&got.p&&!meta.fromCache){clearTimeout(timer);S.pronto=true;setStatus("info","");$("#storeStatus").hidden=true}};
-  const onErr=e=>{clearTimeout(timer);setStatus("bad","Erro no armazenamento ("+esc(e&&e.code)+"): "+esc(e&&e.message)+'. Exporte o backup em <a href="#exportar">Exportar e backup</a> antes de continuar.')};
-  db.collection("despesas").onSnapshot(s=>{S.despesas=s.docs.map(d=>d.data());done("d",s.metadata);renderAll()},onErr);
-  db.collection("extrato").onSnapshot(s=>{S.extrato=s.docs.map(d=>d.data());done("e",s.metadata);renderAll()},onErr);
-  db.doc("config/perfil").onSnapshot(s=>{S.perfil=s.exists?s.data():{};done("p",s.metadata);renderAll()},onErr);
+const BK_LOCAL={
+  nome:"local",
+  load(){try{const raw=localStorage.getItem(LSKEY);if(raw){const o=JSON.parse(raw);S.despesas=o.despesas||[];S.extrato=o.extrato||[];aplicarConfig(o.config||[])}return true}catch(e){return false}},
+  save(){try{localStorage.setItem(LSKEY,JSON.stringify({despesas:S.despesas,extrato:S.extrato,config:[Object.assign({},S.perfil,{id:"perfil"}),...(S.plano?[{id:"plano",plano:S.plano}]:[])]}));return true}catch(e){return false}},
+  set(col,id,obj){
+    if(col==="config"){const docs=[Object.assign({},S.perfil,{id:"perfil"}),...(S.plano?[{id:"plano",plano:S.plano}]:[])].filter(d=>d.id!==id);docs.push(obj);aplicarConfig(docs)}
+    else{const a=S[col];const i=a.findIndex(x=>x.id===id);if(i>=0)a[i]=obj;else a.push(obj)}
+    this.save();atualizarFase();return Promise.resolve()},
+  del(col,id){S[col]=S[col].filter(x=>x.id!==id);this.save();atualizarFase();return Promise.resolve()}
+};
+function startLocal(motivo){
+  if(BK)return;
+  BK=BK_LOCAL;const ok=BK.load()&&BK.save();S.modo=ok?"local":"memoria";
+  setBadge(ok?"b-warn":"b-bad",ok?"Só neste navegador":"Sem salvar");
+  setStatus(ok?"warn":"bad",(ok?"<b>Dados guardados só neste navegador.</b> ":"<b>Nada está sendo salvo.</b> ")+esc(motivo)+' Exporte o backup em <a href="#exportar">Exportar</a> com frequência.');
+  atualizarFase();
+}
+function assinarColecoes(colRef,onErr){
+  const got={despesas:false,extrato:false,config:false};
+  const timer=setTimeout(()=>{if(S.fase==="carregando")setStatus("warn","O banco ainda não respondeu. Verifique a conexão; não cadastre em duplicidade.")},10000);
+  const done=(k,fromCache)=>{got[k]=true;if(got.despesas&&got.extrato&&got.config){clearTimeout(timer);if(!fromCache)setStatus("","");atualizarFase()}};
+  colRef("despesas").onSnapshot(s=>{S.despesas=s.docs.map(d=>d.data());done("despesas",s.metadata.fromCache);renderAll()},onErr);
+  colRef("extrato").onSnapshot(s=>{S.extrato=s.docs.map(d=>d.data());done("extrato",s.metadata.fromCache);renderAll()},onErr);
+  colRef("config").onSnapshot(s=>{aplicarConfig(s.docs.map(d=>Object.assign({id:d.id},d.data())));done("config",s.metadata.fromCache)},onErr);
+}
+function startClaudeDb(db){
+  BK={nome:"claude",set:(col,id,obj)=>db.collection(col).doc(id).set(obj),del:(col,id)=>db.collection(col).doc(id).delete()};
+  S.modo="claude";setBadge("b-ok","Salvo no Claude");
+  assinarColecoes(c=>db.collection(c),e=>{setBadge("b-bad","Erro no banco");setStatus("bad","Erro no armazenamento ("+esc(e&&e.code)+"). Exporte o backup antes de continuar.")});
+}
+function carregarScript(src){return new Promise((ok,no)=>{const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=()=>no(new Error("falha ao carregar "+src));document.head.appendChild(s)})}
+async function startFirebase(cfg){
+  try{
+    const base="https://www.gstatic.com/firebasejs/10.12.2/";
+    await carregarScript(base+"firebase-app-compat.js");
+    await Promise.all([carregarScript(base+"firebase-auth-compat.js"),carregarScript(base+"firebase-firestore-compat.js")]);
+  }catch(e){startLocal("Não foi possível carregar o Firebase (sem internet?).");return}
+  firebase.initializeApp(cfg);const auth=firebase.auth();const fs=firebase.firestore();
+  try{await fs.enablePersistence({synchronizeTabs:true})}catch(_){}
+  FB={auth,fs};
+  auth.getRedirectResult().catch(e=>toast("Falha no login: "+(e&&e.code)));
+  let unsub=[];
+  auth.onAuthStateChanged(u=>{
+    unsub.forEach(f=>f());unsub=[];
+    if(!u){S.user=null;BK=null;S.despesas=[];S.extrato=[];S.plano=null;S.modo="login";S.fase="login";setBadge("b-gray","Desconectado");$("#sairBtn").hidden=true;setStatus("","");renderShell();return}
+    S.user=u;$("#sairBtn").hidden=false;
+    const col=c=>{const r=fs.collection("users").doc(u.uid).collection(c);return{onSnapshot:(a,b)=>{const f=r.onSnapshot(a,b);unsub.push(f);return f}}};
+    const ref=c=>fs.collection("users").doc(u.uid).collection(c);
+    BK={nome:"firebase",set:(c,id,obj)=>ref(c).doc(id).set(obj),del:(c,id)=>ref(c).doc(id).delete()};
+    S.modo="firebase";S.fase="carregando";setBadge("b-ok","Salvo na nuvem");renderShell();
+    assinarColecoes(col,e=>{setBadge("b-bad","Sem acesso");setStatus("bad",e&&e.code==="permission-denied"?"O Firestore negou acesso. Confira se as regras do arquivo firestore.rules foram publicadas no Firebase.":"Erro no banco ("+esc(e&&e.code)+").")});
+  });
+}
+async function entrarGoogle(){
+  const p=new firebase.auth.GoogleAuthProvider();p.setCustomParameters({prompt:"select_account"});
+  try{await FB.auth.signInWithPopup(p)}catch(e){if(e&&(e.code==="auth/popup-blocked"||e.code==="auth/operation-not-supported-in-this-environment"))FB.auth.signInWithRedirect(p);else if(e&&e.code!=="auth/popup-closed-by-user"&&e.code!=="auth/cancelled-popup-request")toast("Falha no login: "+(e.code||e.message))}
 }
 function persist(col,obj){
   obj=JSON.parse(JSON.stringify(obj));
-  if(S.modo!=="db"){
-    if(col==="perfil")S.perfil=obj;else{const arr=S[col];const i=arr.findIndex(x=>x.id===obj.id);if(i>=0)arr[i]=obj;else arr.push(obj)}
-    lsSave();renderAll();return Promise.resolve();
-  }
-  const key=col+"/"+(obj.id||"perfil");
-  const prev=writeQ.get(key)||Promise.resolve();
-  const p=prev.then(()=>col==="perfil"?DB.doc("config/perfil").set(obj):DB.collection(col).doc(obj.id).set(obj)).catch(e=>{toast("Não foi possível salvar ("+(e&&e.code||"erro")+"). Tente de novo.");throw e});
+  if(!BK)return Promise.reject(new Error("sem armazenamento"));
+  if(BK.nome==="local")return BK.set(col,obj.id,obj);
+  const key=col+"/"+obj.id;const prev=writeQ.get(key)||Promise.resolve();
+  const p=prev.then(()=>BK.set(col,obj.id,obj)).catch(e=>{toast("Não foi possível salvar ("+(e&&e.code||"erro")+").");throw e});
   writeQ.set(key,p.catch(()=>{}));return p;
 }
-function remove(col,id){
-  if(S.modo!=="db"){S[col]=S[col].filter(x=>x.id!==id);lsSave();renderAll();return Promise.resolve()}
-  return DB.collection(col).doc(id).delete().catch(e=>{toast("Não foi possível excluir ("+(e&&e.code)+").");throw e});
-}
+function remove(col,id){if(!BK)return Promise.reject();return Promise.resolve(BK.del(col,id)).catch(e=>{toast("Não foi possível excluir ("+(e&&e.code)+").");throw e})}
+function atualizarFase(){if(BK&&S.fase!=="login")S.fase=S.plano?"ok":"semplano";renderShell()}
 
 /* ================= NOMES E EQUIPE ================= */
 const PART=new Set(["da","de","do","das","dos","e"]);
 const toks=n=>norm(n).split(" ").filter(t=>t&&!PART.has(t));
-const isCoord=n=>{const t=toks(n);return t.includes("ernandes")&&t.includes("sobreira")};
+const isCoord=n=>{const c=toks(PROJ.coord),t=toks(n);return c.length>1&&t.includes(c[0])&&t.includes(c[1])};
 function membroEquipe(nome){
   const f=toks(nome);if(f.length<2)return null;
   for(const m of EQUIPE){const t=toks(m);if(norm(m)===norm(nome)||(f[0]===t[0]&&f[f.length-1]===t[t.length-1]))return m}
@@ -406,11 +492,11 @@ const RX={
   tarifa:/tarifa|taxa bancaria|cesta de servicos|\btar\b|\bmanut(encao)? conta/,
   perm:["notebook","computador","desktop","impressora","projetor","camera","tablet","celular","smartphone","monitor","caixa de som","caixa ativa","microfone","mesa","cadeira","armario","estante","ventilador","ar condicionado","geladeira","freezer","tripe","hd externo","estabilizador","nobreak","furadeira","parafusadeira","bebedouro","roteador"]
 };
+const vig=()=>`${fmtData(PROJ.vigIni)} a ${fmtData(PROJ.vigFim)}`;
 function docsDe(d,t){return(d.documentos||[]).filter(x=>x.tipo===t)}
 function linhasDe(d){return S.extrato.filter(l=>l.despesaId===d.id)}
 function prepararCtx(){
-  const excesso=new Map();
-  const porItem={};
+  const excesso=new Map(),porItem={};
   for(const d of S.despesas){if(d.itemId&&ITEM[d.itemId]&&d.valorCentavos!=null)(porItem[d.itemId]=porItem[d.itemId]||[]).push(d)}
   for(const[id,arr]of Object.entries(porItem)){
     arr.sort((a,b)=>(a.data||"9999").localeCompare(b.data||"9999")||(a.criadoEm||"").localeCompare(b.criadoEm||""));
@@ -430,17 +516,18 @@ function avaliar(d,ctx){
   if(!T)R.campos.push("tipo de despesa");
   if(!d.favorecido&&d.tipo!=="taxa_bancaria")R.campos.push(d.tipo==="diaria"?"beneficiário da diária":"favorecido");
   if(d.tipo==="diaria"&&!(d.quantidade>0))R.campos.push("quantidade de diárias");
-  if(d.data&&(d.data<PROJ.vigIni||d.data>PROJ.vigFim))err("vig",`Data ${fmtData(d.data)} fora da vigência (19/11/2025 a 18/11/2027).`,"Item 3.13 b","Despesa fora da vigência não é aceita. Se a data está errada, corrija. Se está certa, não use recurso do projeto; se já usou, prepare a devolução.");
+  if(d.data&&(d.data<PROJ.vigIni||d.data>PROJ.vigFim))err("vig",`Data ${fmtData(d.data)} fora da vigência (${vig()}).`,"Item 3.13 b","Despesa fora da vigência não é aceita. Se a data está errada, corrija. Se está certa, não use recurso do projeto; se já usou, prepare a devolução.");
   const txt=norm([d.descricao,...(d.documentos||[]).map(x=>x.campos&&x.campos.descricaoItens)].filter(Boolean).join(" "));
+  const limiteRem=PRAZOS.find(p=>/remanej/i.test(p[1]));
   if(T&&d.tipo!=="taxa_bancaria"){
-    if(!item)err("semitem","Despesa sem item correspondente no orçamento aprovado.","Itens 3.1 e 3.14","Escolha o item certo no orçamento. Se não existir, não gaste: peça remanejamento à FAPEMAT antes (limite 19/09/2027).");
+    if(!item)err("semitem","Despesa sem item correspondente no orçamento aprovado.","Itens 3.1 e 3.14","Escolha o item certo no orçamento. Se não existir, não gaste: peça remanejamento à FAPEMAT antes"+(limiteRem?` (limite ${fmtData(limiteRem[0])})`:"")+".");
     else{
-      const natI=RUB[item.rubrica].natureza;
+      const natI=RUB[item.rubrica]?RUB[item.rubrica].natureza:"custeio";
       if(natI!==T.natureza)err("cap",T.natureza==="capital"?`Despesa de capital (${T.nome.toLowerCase()}) lançada em item de custeio (${item.nome}).`:`Despesa de custeio lançada em item de capital (${item.nome}).`,"Item 3.2","Saldo de custeio não paga capital, nem o contrário. Lance no item da natureza certa ou peça remanejamento.");
-      else if(T.rubrica!==item.rubrica)err("rub",`Tipo "${T.nome}" não corresponde à rubrica do item (${RUB[item.rubrica].nome}).`,"Item 3.1","Escolha um item da rubrica correta.");
+      else if(T.rubrica!==item.rubrica)err("rub",`Tipo "${T.nome}" não corresponde à rubrica do item (${RUB[item.rubrica]?RUB[item.rubrica].nome:item.rubrica}).`,"Item 3.1","Escolha um item da rubrica correta.");
       const ex=ctx.excesso.get(d.id);
       if(ex)err("saldo",`Ultrapassa o saldo do item "${item.nome}" em ${brl(ex)}.`,"Itens 3.1 e 3.14","Reduza o valor ou peça remanejamento à FAPEMAT antes de gastar.");
-      if(item.generica)cinza("generica","Lançada na linha genérica de material de consumo (R$ 64.800,00), que não especifica os materiais.","Item 3.1","Pergunte à FAPEMAT se este material é aceito nessa linha e guarde a resposta por escrito.");
+      if(item.generica)cinza("generica",`Lançada na linha genérica de material de consumo (${brl(item.total)}), que não especifica os materiais.`,"Item 3.1","Pergunte à FAPEMAT se este material é aceito nessa linha e guarde a resposta por escrito.");
     }
   }
   if(d.tipo==="taxa_bancaria"){
@@ -451,10 +538,10 @@ function avaliar(d,ctx){
   if(d.tipo==="diaria"){
     if(item&&item.rubrica==="diarias"&&d.quantidade>0&&d.valorCentavos!=null){
       const esperado=Math.round(d.quantidade*item.unit);
-      if(esperado!==d.valorCentavos)err("diariavalor",`Valor não confere: ${brl(d.valorCentavos)} para ${fmtQtd(d.quantidade)} diária(s) a ${item.destino}; o correto é ${brl(esperado)} (${brl(item.unit)} por diária ${item.uf==="MT"?"em MT":"fora de MT"}).`,"Item 3.6","Corrija o valor pago ou a quantidade de diárias.");
+      if(esperado!==d.valorCentavos)err("diariavalor",`Valor não confere: ${brl(d.valorCentavos)} para ${fmtQtd(d.quantidade)} diária(s) a ${item.destino||item.nome}; o correto é ${brl(esperado)} (${brl(item.unit)} por diária).`,"Item 3.6",`Diária vale ${brl(PROJ.diariaDentro)} em ${PROJ.uf} e ${brl(PROJ.diariaFora)} fora de ${PROJ.uf}. Corrija o valor pago ou a quantidade.`);
     }
     if(d.quantidade>0&&!Number.isInteger(d.quantidade))cinza("fracionada",`Diária fracionada (${fmtQtd(d.quantidade)}).`,"Item 3.6","Confirme com a FAPEMAT como pagar e comprovar a fração.");
-    if(/caceres/.test(norm((d.destino||"")+" "+(item?item.destino:"")+" "+d.descricao))&&isCoord(d.favorecido))err("caceres","Diária do coordenador com destino a Cáceres, cidade da sua lotação.","Item 3.13 c","Diária para Cáceres não pode ser paga ao coordenador. Exclua esta despesa.");
+    if(PROJ.sede&&norm((d.destino||"")+" "+(item&&item.destino||"")+" "+d.descricao).includes(norm(PROJ.sede))&&isCoord(d.favorecido))err("sede",`Diária do coordenador com destino a ${PROJ.sede}, cidade da sua lotação.`,"Item 3.13 c",`Diária para ${PROJ.sede} não pode ser paga ao coordenador. Exclua esta despesa.`);
   }
   if(d.tipo&&d.tipo!=="diaria"&&d.data&&RX.hosp.test(txt)){
     const viag=S.despesas.find(x=>x.tipo==="diaria"&&x.data&&Math.abs(diasEntre(x.data,d.data))<=7);
@@ -475,36 +562,30 @@ function avaliar(d,ctx){
         else if(p.resposta==="sim")err("parente",`Favorecido declarado cônjuge ou parente até 3º grau de ${s.membro}.`,"Item 3.13 c e d","Não pague. Contrate outra pessoa.");
       }}
   }
-  if(d.pagamentoMultiplo)err("multi","Um mesmo pagamento cobre mais de uma despesa.","Item 3.4.1","Cada despesa precisa de pagamento próprio. Peça ao favorecido documentos separados ou refaça o pagamento.");
+  if(d.pagamentoMultiplo)err("multi","Um mesmo pagamento cobre mais de uma despesa.","Item 3.4.1","Cada despesa precisa de pagamento próprio. Peça documentos separados ou refaça o pagamento.");
   if(d.formaPagamento==="saque"&&!(d.justificativaSaque||"").trim())err("saque","Saque em dinheiro sem justificativa.","Item 3.4.1","Registre a justificativa do saque ou pague por transferência.");
   for(const l of linhasDe(d)){if(d.valorCentavos!=null&&l.valorCentavos>d.valorCentavos)err("multi-ext",`O débito do extrato de ${fmtData(l.data)} (${brl(l.valorCentavos)}) é maior que a despesa (${brl(d.valorCentavos)}): parece pagar mais de uma despesa.`,"Item 3.4.1","Confira a conciliação. Cada pagamento deve corresponder a uma única despesa.")}
   if(T){
-    for(const t of T.docs){
-      if(t==="extrato"){if(!linhasDe(d).length)R.faltas.push(t);continue}
-      if(!docsDe(d,t).length)R.faltas.push(t);
-    }
+    for(const t of T.docs){if(t==="extrato"){if(!linhasDe(d).length)R.faltas.push(t);continue}if(!docsDe(d,t).length)R.faltas.push(t)}
     if(T.orc){const n=docsDe(d,"orcamento").length;if(n<3)R.opcionais.push(`Três orçamentos (recomendado, não obrigatório): ${n} de 3`)}
   }
   if(T&&T.docs.includes("nf")){
+    const procDig=digits(PROJ.processo);
     for(const nf of docsDe(d,"nf")){
       const c=nf.campos||{};const f=[];
       if(!c.destinatarioNome)f.push("nome do beneficiário");
       else if(!isCoord(c.destinatarioNome))f.push(`nome do beneficiário correto (está em nome de "${c.destinatarioNome}")`);
       if(!digits(c.destinatarioCpf))f.push("CPF do beneficiário");
       else if(digits(S.perfil.cpf)&&digits(c.destinatarioCpf)!==digits(S.perfil.cpf))f.push("CPF do coordenador (o CPF da nota é outro)");
-      if(!digits(c.processoTexto).includes("00022092025"))f.push("número do processo FAPEMAT-PRO.0002209/2025");
+      if(!procDig||!digits(c.processoTexto).includes(procDig))f.push(`número do processo ${PROJ.processo}`);
       if(!c.data)f.push("data");
       const di=norm(c.descricaoItens);
       if(di.length<15||/^(diversos|material|materiais|servico|servicos|mercadoria|mercadorias|produtos?)\b/.test(di)&&di.length<40)f.push("descrição detalhada");
-      if(f.length)err("nf-"+nf.id,`Nota fiscal${c.numero?" nº "+c.numero:""} sem ${f.join(", ")}.`,"Item 3.8","Peça ao fornecedor nota corrigida em nome de Ernandes Sobreira Oliveira Junior, com CPF, data, descrição detalhada dos itens e o processo FAPEMAT-PRO.0002209/2025.");
+      if(f.length)err("nf-"+nf.id,`Nota fiscal${c.numero?" nº "+c.numero:""} sem ${f.join(", ")}.`,"Item 3.8",`Peça ao fornecedor nota corrigida em nome de ${PROJ.coord}, com CPF, data, descrição detalhada dos itens e o processo ${PROJ.processo}.`);
     }
   }
-  let estado;
-  if(R.erros.length)estado="irregular";
-  else if(R.cinzas.length)estado="fapemat";
-  else if(R.faltas.length||R.campos.length||R.perguntas.length)estado="pendente";
-  else estado="comprovada";
-  R.estado=estado;return R;
+  R.estado=R.erros.length?"irregular":R.cinzas.length?"fapemat":(R.faltas.length||R.campos.length||R.perguntas.length)?"pendente":"comprovada";
+  return R;
 }
 function calcular(){
   const ctx=prepararCtx();const av=new Map();
@@ -521,31 +602,31 @@ function calcular(){
     if(rub&&porRub[rub])porRub[rub][k]+=v;else sem[k]+=v;
   }
   const nat={custeio:zero(),capital:zero()};
-  for(const r of RUBRICAS)["gasto","pendente","irregular"].forEach(k=>nat[r.natureza][k]+=porRub[r.id][k]);
+  for(const r of RUBRICAS)["gasto","pendente","irregular"].forEach(k=>nat[r.natureza==="capital"?"capital":"custeio"][k]+=porRub[r.id][k]);
   ["gasto","pendente","irregular"].forEach(k=>nat.custeio[k]+=sem[k]);
   const usado=o=>o.gasto+o.pendente+o.irregular;
   return{av,porItem,porRub,sem,nat,cont,usado,
     disp:{total:PROJ.total-usado(nat.custeio)-usado(nat.capital),custeio:PROJ.custeio-usado(nat.custeio),capital:PROJ.capital-usado(nat.capital)}};
 }
 
-/* ================= IA (somente leitura e sugestão) ================= */
-const LISTA_ITENS=ITENS.map(i=>`${i.id} | ${RUB[i.rubrica].nome} | ${i.nome}`).join("\n");
-const REGRA_IA=`REGRAS ABSOLUTAS:
+/* ================= LEITURA: IA (só no Claude) e leitor local (fora dele) ================= */
+const listaItens=()=>ITENS.map(i=>`${i.id} | ${RUB[i.rubrica]?RUB[i.rubrica].nome:i.rubrica} | ${i.nome}`).join("\n");
+const regraIA=()=>`REGRAS ABSOLUTAS:
 - Nunca invente, estime, arredonde ou complete valor, data, CPF, CNPJ, nome ou descrição.
 - Se uma informação não estiver escrita de forma legível, use null. Prefira null a um palpite.
 - Copie valores e datas exatamente como aparecem (ex.: "302,50", "12/03/2026"). Não acrescente ano que não esteja escrito.
 - "tipo_sugerido" e "item_sugerido" são sugestões de classificação; use null se não houver correspondência clara.
 Tipos: consumo, servico_pj, servico_pf, diaria, passagem, equipamento, taxa_bancaria.
 Itens do orçamento aprovado (id | rubrica | nome):
-${LISTA_ITENS}`;
+${listaItens()}`;
 function promptTexto(t){return `Você extrai dados de um gasto descrito por escrito pelo coordenador de um projeto de pesquisa. Responda somente com um objeto JSON.
-${REGRA_IA}
+${regraIA()}
 Formato:
 {"valor_texto": string|null, "data_texto": string|null, "favorecido": string|null, "documento_favorecido": string|null, "descricao": string|null (resumo fiel, sem acrescentar nada), "quantidade_texto": string|null (quantidade de diárias, se citada), "destino": string|null, "tipo_sugerido": string|null, "item_sugerido": string|null, "tipo_documento": string|null, "forma_pagamento": "pix"|"transferencia"|"boleto"|"cartao"|"cheque"|"saque"|null}
 Texto do coordenador:
 """${t}"""`}
 function promptImagem(nota){return `A imagem é um documento financeiro de um projeto de pesquisa (extrato bancário, nota fiscal, recibo, bilhete, comprovante de pagamento, comprovante de embarque, termo de incorporação ou orçamento). Leia e responda somente com um objeto JSON.
-${REGRA_IA}
+${regraIA()}
 Tipos de documento: extrato, nf, comprovante, recibo_pf, recibo_diaria, bilhete, fatura, embarque, termo, orcamento, outro.
 Formato:
 {"tipo_documento": string, "legivel": boolean,
@@ -559,16 +640,44 @@ Formato:
  "lancamentos": [{"data_texto": string|null, "descricao": string|null, "valor_texto": string|null, "natureza": "debito"|"credito"|null}] (somente para extrato: uma entrada por linha visível; omita saldos),
  "observacoes": string|null (o que ficou ilegível ou cortado)}
 ${nota?`Observação do coordenador (contexto, não é fonte de valores): """${nota}"""`:""}`}
+/* Leitor local: copia só o que está escrito; não completa nada. */
+const GENERICAS=new Set(["material","materiais","consumo","linha","generica","especificacao","diversos","para","com","sem","servico","servicos","pessoa","fisica","juridica","passagem","diarias"]);
+function lerTextoLocal(txt){
+  const n=norm(txt);
+  const RXD=/(?<![\d.,])\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?(?![\d,])/;
+  const semDatas=txt.replace(new RegExp(RXD.source,"g")," ");
+  let valor=null,m;
+  if((m=semDatas.match(/R\$\s*(\d[\d.]*(?:,\d{1,2})?)/i)))valor=m[1];
+  else if((m=semDatas.match(/\b(\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?|\d+,\d{1,2})\b/)))valor=m[1];
+  else{const nums=[...semDatas.matchAll(/\b(\d{2,})\b/g)].map(x=>x[1]).filter(x=>!/^20\d\d$/.test(x));if(nums.length===1)valor=nums[0]}
+  const dm=txt.match(RXD)||txt.match(/\d{1,2}\s+de\s+[a-zç]+(?:\s+de\s+\d{4})?/i);
+  const qm=n.match(/(\d+(?:[.,]\d+)?)\s*diarias?/);
+  let tipo=null;
+  if(/diaria/.test(n))tipo="diaria";else if(/passage|bilhete|aere/.test(n))tipo="passagem";else if(RX.tarifa.test(n))tipo="taxa_bancaria";
+  let item=null,melhor=0;
+  for(const i of ITENS){
+    if(tipo==="diaria"&&i.rubrica!=="diarias")continue;
+    if(tipo==="passagem"&&i.rubrica!=="passagens")continue;
+    if(tipo!=="diaria"&&tipo!=="passagem"&&(i.rubrica==="diarias"||i.rubrica==="passagens"))continue;
+    let sc=0;
+    if(i.destino&&n.includes(norm(i.destino)))sc+=3;
+    if(tipo!=="diaria"&&tipo!=="passagem")toks(i.nome).filter(t=>t.length>3&&!GENERICAS.has(t)).forEach(t=>{const raiz=t.slice(0,Math.max(4,t.length-2));if(n.includes(raiz))sc+=1});
+    if(sc>melhor){melhor=sc;item=i}
+  }
+  if(item&&!tipo)tipo={diarias:"diaria",passagens:"passagem",consumo:"consumo",servpf:"servico_pf",servpj:"servico_pj",equip:"equipamento"}[item.rubrica]||null;
+  const forma=/\bpix\b/.test(n)?"pix":/transfer|\bted\b/.test(n)?"transferencia":/boleto/.test(n)?"boleto":/cartao/.test(n)?"cartao":/\bsaque|saquei/.test(n)?"saque":null;
+  return{valor_texto:valor,data_texto:dm?dm[0]:null,descricao:txt,quantidade_texto:qm?qm[1]:null,destino:item&&item.destino||null,tipo_sugerido:tipo,item_sugerido:item?item.id:null,forma_pagamento:forma,favorecido:null,documento_favorecido:null};
+}
 const s0=v=>v==null?null:(String(v).trim()||null);
-const ERRO_IA={not_granted:"Você não autorizou o uso do Claude nesta página.",sampling_disabled:"O Claude não está disponível para esta conta.",rate_limited:"Muitas leituras seguidas ou limite de uso atingido. Espere um pouco e tente de novo.",image_rejected:"A imagem não foi aceita (formato ou tamanho). Use JPG, PNG ou WebP.",images_unavailable:"Esta visualização não envia imagens ao Claude.",invalid_json:"A resposta veio fora do formato. Tente de novo.",refused:"O Claude recusou esta leitura.",session_expired:"Sua sessão expirou. Entre de novo.",upstream_error:"Falha de conexão com o Claude. Tente de novo."};
+const ERRO_IA={not_granted:"Você não autorizou o uso do Claude nesta página.",sampling_disabled:"O Claude não está disponível para esta conta.",rate_limited:"Muitas leituras seguidas ou limite de uso atingido. Espere e tente de novo.",image_rejected:"A imagem não foi aceita. Use JPG, PNG ou WebP.",images_unavailable:"Esta visualização não envia imagens ao Claude.",invalid_json:"A resposta veio fora do formato. Tente de novo.",refused:"O Claude recusou esta leitura.",session_expired:"Sua sessão expirou. Entre de novo.",upstream_error:"Falha de conexão com o Claude. Tente de novo."};
 const msgErro=e=>ERRO_IA[e&&e.code]||("Falha na leitura ("+(e&&e.code||"erro")+").");
 
 /* ================= RASCUNHOS (cartões de confirmação) ================= */
-let drafts=[];let fileSel=null;let docAlvo=null;
+let drafts=[],fileSel=null,docAlvo=null;
 function renderFileChip(){
   const el=$("#fileChip");
   if(!fileSel){el.hidden=true;el.innerHTML="";return}
-  el.hidden=false;el.innerHTML=`<span class="chip"><span>${esc(fileSel.name)}</span><button type="button" class="linkbtn" data-act="clearfile" aria-label="Remover foto">remover</button></span>${docAlvo?` <span class="hint">Documento para a despesa: ${esc((S.despesas.find(x=>x.id===docAlvo)||{}).descricao||"")}</span>`:""}`;
+  el.hidden=false;el.innerHTML=`<span class="chip"><span>${esc(fileSel.name)}</span><button type="button" class="linkbtn" data-act="clearfile">remover</button></span>${docAlvo?` <span class="hint">Documento para: ${esc((S.despesas.find(x=>x.id===docAlvo)||{}).descricao||"")}</span>`:""}`;
 }
 function verificaLiteral(valTxt,orig){if(!valTxt)return null;const d=digits(valTxt);return d&&digits(orig).includes(d)?valTxt:null}
 function despesaDeIA(o,origem,orig){
@@ -576,14 +685,11 @@ function despesaDeIA(o,origem,orig){
   const datTxt=origem==="texto"?verificaLiteral(o.data_texto,orig):s0(o.data_texto);
   const pd=parseData(datTxt);
   const q=s0(o.quantidade_texto);const qn=q?Number(String(q).replace(",",".").replace(/[^\d.]/g,"")):null;
-  const tipo=TIPOS[o.tipo_sugerido]?o.tipo_sugerido:"";
-  return{
-    data:pd&&pd.iso||"",dataParcial:pd&&pd.parcial?pd:null,
-    valorCentavos:parseValor(valTxt),
+  return{data:pd&&pd.iso||"",dataParcial:pd&&pd.parcial?pd:null,valorCentavos:parseValor(valTxt),
     favorecido:s0(o.favorecido||o.emitente)||"",docFavorecido:s0(o.documento_favorecido||o.emitente_documento)||"",
-    descricao:s0(o.descricao||o.descricao_itens)||"",tipo,itemId:ITEM[o.item_sugerido]?o.item_sugerido:"",
+    descricao:s0(o.descricao||o.descricao_itens)||"",tipo:TIPOS[o.tipo_sugerido]?o.tipo_sugerido:"",itemId:ITEM[o.item_sugerido]?o.item_sugerido:"",
     destino:s0(o.destino)||"",quantidade:qn&&isFinite(qn)?qn:null,
-    formaPagamento:FORMAS[o.forma_pagamento]?o.forma_pagamento:"",justificativaSaque:"",pagamentoMultiplo:false,observacoes:""};
+    formaPagamento:FORMAS[o.forma_pagamento]?o.forma_pagamento:"",justificativaSaque:"",pagamentoMultiplo:false};
 }
 function camposDocDeIA(o){
   const pd=parseData(s0(o.data_texto));
@@ -607,30 +713,26 @@ function candidatosDoc(c,tipoDoc,alvo){
 function candidatosLinha(l,usados){
   return S.despesas.filter(d=>d.valorCentavos!=null&&d.valorCentavos===l.valorCentavos&&(!l.data||!d.data||Math.abs(diasEntre(l.data,d.data))<=5)&&!S.extrato.some(x=>x.despesaId===d.id)&&!usados.has(d.id));
 }
-function duplicatasDe(v){
-  if(v.valorCentavos==null)return[];
-  return S.despesas.filter(d=>d.valorCentavos===v.valorCentavos&&(!v.data||!d.data||Math.abs(diasEntre(v.data,d.data))<=5));
-}
-
+function duplicatasDe(v){if(v.valorCentavos==null)return[];return S.despesas.filter(d=>d.valorCentavos===v.valorCentavos&&(!v.data||!d.data||Math.abs(diasEntre(v.data,d.data))<=5))}
+const CAMPOS_REQ=["data","valorCentavos","descricao","tipo","favorecido"];
 async function enviarEntrada(){
   const txt=$("#entrada").value.trim();const file=fileSel;
   if(!txt&&!file){toast("Escreva o gasto ou anexe uma foto.");return}
   if(!file&&/\?\s*$/.test(txt)&&!/\d/.test(txt)){location.hash="#assistente";setTimeout(()=>{const c=$("#chatIn");if(c){c.value=txt;c.focus()}},50);$("#entrada").value="";return}
-  if(!AI){toast(AI_STATE==="carregando"?"O Claude ainda está carregando. Tente em alguns segundos.":"O Claude não está disponível nesta visualização. Cadastre a despesa manualmente em Lançamentos.");return}
-  const dr={id:uid(),status:"lendo",origem:file?"foto":"texto",texto:txt,arquivo:file?file.name:null,alvo:docAlvo,ctl:new AbortController()};
+  if(file&&!AI){toast("Leitura de foto só funciona com o Claude.");return}
+  const dr={id:uid(),status:"lendo",origem:file?"foto":"texto",texto:txt,arquivo:file?file.name:null,alvo:docAlvo,ctl:new AbortController(),local:!AI};
   drafts.unshift(dr);$("#entrada").value="";fileSel=null;docAlvo=null;$("#foto").value="";renderFileChip();renderDrafts();
   try{
     if(file){
       const o=await AI.json(promptImagem(txt),{images:[file],signal:dr.ctl.signal,cache:false});
       if(!o||typeof o!=="object")throw{code:"invalid_json"};
-      dr.ia=o;dr.obs=s0(o.observacoes);
+      dr.obs=s0(o.observacoes);dr.legivel=o.legivel!==false;
       if(o.tipo_documento==="extrato"){
         dr.kind="extrato";
-        dr.linhas=(Array.isArray(o.lancamentos)?o.lancamentos:[]).map(x=>{const pd=parseData(s0(x.data_texto));return{id:uid(),data:pd&&pd.iso||"",descricao:s0(x.descricao)||"",valorCentavos:(v=>v==null?null:Math.abs(v))(parseValor(s0(x.valor_texto))),natureza:x.natureza==="credito"?"credito":x.natureza==="debito"?"debito":""}});
+        dr.linhas=(Array.isArray(o.lancamentos)?o.lancamentos:[]).map(x=>{const pd=parseData(s0(x.data_texto));const v=parseValor(s0(x.valor_texto));return{id:uid(),data:pd&&pd.iso||"",descricao:s0(x.descricao)||"",valorCentavos:v==null?null:Math.abs(v),natureza:x.natureza==="credito"?"credito":x.natureza==="debito"?"debito":""}});
         const usados=new Set();
         dr.linhas.forEach(l=>{
-          const ja=S.extrato.find(x=>x.data===l.data&&x.valorCentavos===l.valorCentavos&&norm(x.descricao)===norm(l.descricao));
-          if(ja){l.acao="ignorar";l.nota="Já importado";return}
+          if(S.extrato.find(x=>x.data===l.data&&x.valorCentavos===l.valorCentavos&&norm(x.descricao)===norm(l.descricao))){l.acao="ignorar";l.nota="já importado";return}
           if(l.natureza==="credito"){l.acao="ignorar";return}
           const c=l.valorCentavos!=null?candidatosLinha(l,usados):[];
           if(c[0]){l.acao="conc:"+c[0].id;usados.add(c[0].id)}else l.acao="criar";
@@ -638,37 +740,31 @@ async function enviarEntrada(){
       }else{
         dr.kind="documento";dr.tipoDoc=DOCS[o.tipo_documento]?o.tipo_documento:"outro";
         dr.campos=camposDocDeIA(o);dr.desp=despesaDeIA(o,"foto",txt);
-        dr.cands=candidatosDoc(dr.campos,dr.tipoDoc,dr.alvo);
-        dr.vinculo=dr.cands[0]?dr.cands[0].d.id:"nova";
+        dr.cands=candidatosDoc(dr.campos,dr.tipoDoc,dr.alvo);dr.vinculo=dr.cands[0]?dr.cands[0].d.id:"nova";
       }
-      dr.legivel=o.legivel!==false;
     }else{
-      const o=await AI.json(promptTexto(txt),{signal:dr.ctl.signal,modelTier:"default",cache:false});
+      const o=AI?await AI.json(promptTexto(txt),{signal:dr.ctl.signal,cache:false}):lerTextoLocal(txt);
       if(!o||typeof o!=="object")throw{code:"invalid_json"};
       dr.kind="despesa";dr.desp=despesaDeIA(o,"texto",txt);
       dr.dups=duplicatasDe(dr.desp);dr.mesclar=dr.dups[0]?dr.dups[0].id:"nova";
     }
     dr.status="pronto";
-    dr.editando=dr.kind==="despesa"?["data","valorCentavos","descricao","tipo","favorecido"].some(k=>dr.desp[k]==null||dr.desp[k]===""):dr.kind==="documento"?["numero","data","valorCentavos"].some(k=>dr.campos[k]==null||dr.campos[k]===""):true;
+    dr.editando=dr.kind==="despesa"?CAMPOS_REQ.some(k=>dr.desp[k]==null||dr.desp[k]===""):dr.kind==="documento"?["numero","data","valorCentavos"].some(k=>dr.campos[k]==null||dr.campos[k]===""):true;
   }catch(e){
-    if(e&&e.code==="cancelled"){drafts=drafts.filter(x=>x!==dr)}
-    else{dr.status="erro";dr.erro=msgErro(e)}
+    if(e&&e.code==="cancelled")drafts=drafts.filter(x=>x!==dr);else{dr.status="erro";dr.erro=msgErro(e)}
   }
   renderDrafts();
 }
-
-/* ---------- HTML de campos de despesa ---------- */
 function optItens(sel,tipo){
   const rubT=TIPOS[tipo]&&TIPOS[tipo].rubrica;
   const ord=[...RUBRICAS].sort((a,b)=>(b.id===rubT)-(a.id===rubT));
   return `<option value="">— sem item —</option>`+ord.map(r=>`<optgroup label="${esc(r.nome)}">${ITENS.filter(i=>i.rubrica===r.id).map(i=>`<option value="${i.id}"${i.id===sel?" selected":""}>${esc(i.nome)} · ${brl(i.total)}</option>`).join("")}</optgroup>`).join("");
 }
 function fld(label,inner,vazio,cls){return `<label class="fld${vazio?" vazio":""}${cls?" "+cls:""}"><span>${label}</span>${inner}</label>`}
-function camposDespesa(v,marcarVazios){
-  const vz=k=>marcarVazios&&(v[k]==null||v[k]==="");
-  const viag=v.tipo==="diaria"||v.tipo==="passagem";
+function camposDespesa(v,marcar){
+  const vz=k=>marcar&&(v[k]==null||v[k]==="");const viag=v.tipo==="diaria"||v.tipo==="passagem";
   return `<div class="grid">
-   ${fld("Data",`<input type="date" name="data" value="${esc(v.data)}" min="2025-01-01" max="2028-12-31">`,vz("data"))}
+   ${fld("Data",`<input type="date" name="data" value="${esc(v.data)}">`,vz("data"))}
    ${fld("Valor (R$)",`<input type="text" inputmode="decimal" name="valor" value="${esc(numBR(v.valorCentavos))}" placeholder="0,00">`,vz("valorCentavos"))}
    ${fld("Tipo de despesa",`<select name="tipo"><option value="">— escolha —</option>${Object.entries(TIPOS).map(([k,t])=>`<option value="${k}"${k===v.tipo?" selected":""}>${esc(t.nome)}</option>`).join("")}</select>`,vz("tipo"))}
    ${fld("Item do orçamento",`<select name="itemId">${optItens(v.itemId,v.tipo)}</select>`,vz("itemId")&&v.tipo!=="taxa_bancaria")}
@@ -676,7 +772,7 @@ function camposDespesa(v,marcarVazios){
    ${fld("CPF ou CNPJ do favorecido",`<input type="text" name="docFavorecido" value="${esc(v.docFavorecido)}" inputmode="numeric">`,false)}
    ${fld("Descrição",`<textarea class="f" name="descricao">${esc(v.descricao)}</textarea>`,vz("descricao"),"full")}
    ${fld("Destino",`<input type="text" name="destino" value="${esc(v.destino)}">`,false,"viag"+(viag?"":" hide"))}
-   ${fld("Quantidade de diárias",`<input type="text" inputmode="decimal" name="quantidade" value="${esc(fmtQtd(v.quantidade))}">`,marcarVazios&&v.tipo==="diaria"&&!v.quantidade,"viag-d"+(v.tipo==="diaria"?"":" hide"))}
+   ${fld("Quantidade de diárias",`<input type="text" inputmode="decimal" name="quantidade" value="${esc(fmtQtd(v.quantidade))}">`,marcar&&v.tipo==="diaria"&&!v.quantidade,"viag-d"+(v.tipo==="diaria"?"":" hide"))}
    ${fld("Forma de pagamento",`<select name="formaPagamento"><option value="">—</option>${Object.entries(FORMAS).map(([k,n])=>`<option value="${k}"${k===v.formaPagamento?" selected":""}>${n}</option>`).join("")}</select>`,false)}
    ${fld("Justificativa do saque",`<input type="text" name="justificativaSaque" value="${esc(v.justificativaSaque)}">`,false,"saque"+(v.formaPagamento==="saque"?"":" hide"))}
    <label class="check full"><input type="checkbox" name="pagamentoMultiplo"${v.pagamentoMultiplo?" checked":""}> Este pagamento também quitou outra despesa</label>
@@ -698,7 +794,7 @@ function camposDoc(c,tipoDoc,marcar){
    ${fld("CNPJ ou CPF do emitente",`<input type="text" name="emitenteDoc" value="${esc(c.emitenteDoc)}">`,vz("emitenteDoc"))}
    ${nf?fld("Destinatário (nome)",`<input type="text" name="destinatarioNome" value="${esc(c.destinatarioNome)}">`,vz("destinatarioNome")):""}
    ${nf?fld("Destinatário (CPF)",`<input type="text" name="destinatarioCpf" value="${esc(c.destinatarioCpf)}">`,vz("destinatarioCpf")):""}
-   ${nf?fld("Trecho com o nº do processo FAPEMAT",`<input type="text" name="processoTexto" value="${esc(c.processoTexto)}">`,vz("processoTexto"),"full"):""}
+   ${nf?fld("Trecho com o nº do processo",`<input type="text" name="processoTexto" value="${esc(c.processoTexto)}">`,vz("processoTexto"),"full"):""}
    ${fld("Descrição dos itens ou serviços",`<textarea class="f" name="descricaoItens">${esc(c.descricaoItens)}</textarea>`,nf&&vz("descricaoItens"),"full")}
   </div>`;
 }
@@ -707,25 +803,26 @@ function lerDoc(root){
   return{tipoDoc:g("tipoDoc"),campos:{numero:g("numero"),data:g("cdata"),valorCentavos:parseValor(g("cvalor")),emitente:g("emitente"),emitenteDoc:g("emitenteDoc"),destinatarioNome:g("destinatarioNome"),destinatarioCpf:g("destinatarioCpf"),processoTexto:g("processoTexto"),descricaoItens:g("descricaoItens")}};
 }
 const rotDesp=d=>`${fmtData(d.data)} · ${brl(d.valorCentavos)} · ${esc(d.descricao||d.favorecido||"sem descrição")}`;
-
 function renderDrafts(){
   const el=$("#drafts");
   el.innerHTML=drafts.map(dr=>{
-    const head=`<div class="card-head"><div><span class="eyebrow">${dr.kind==="extrato"?"Extrato bancário":dr.kind==="documento"?"Documento":dr.kind==="manual"?"Documento sem foto":"Despesa"} ${dr.arquivo?"· "+esc(dr.arquivo):dr.origem==="texto"?"· lida do texto":""}</span></div><button class="btn ghost sm" data-act="descartar" data-id="${dr.id}">Descartar</button></div>`;
+    const rot=dr.kind==="extrato"?"Extrato bancário":dr.kind==="documento"?"Documento":dr.kind==="manual"?"Documento sem foto":"Despesa";
+    const head=`<div class="card-head"><div class="row"><span class="badge b-warn">Confira antes de salvar</span><span class="eyebrow">${rot}${dr.arquivo?" · "+esc(dr.arquivo):dr.origem==="texto"?(dr.local?" · lida pelo app, sem IA":" · lida pelo Claude"):""}</span></div><button class="btn ghost sm" data-act="descartar" data-id="${dr.id}">Descartar</button></div>`;
     if(dr.status==="lendo")return `<article class="card draft">${head}<p><span class="spinner"></span> Lendo ${dr.origem==="foto"?"a imagem":"o texto"}… <button class="linkbtn" data-act="parar" data-id="${dr.id}">Parar</button></p>${dr.texto?`<p class="quote">${esc(dr.texto)}</p>`:""}</article>`;
     if(dr.status==="erro")return `<article class="card draft">${head}<div class="alert bad">${esc(dr.erro)}</div>${dr.texto?`<p class="quote">${esc(dr.texto)}</p>`:""}</article>`;
     const obs=dr.obs?`<div class="alert warn"><b>Observação da leitura:</b> ${esc(dr.obs)}</div>`:"";
     const ileg=dr.legivel===false?`<div class="alert warn">A imagem foi considerada pouco legível. Confira cada campo com o documento em mãos.</div>`:"";
-    const foot=`<div class="card-foot"><button class="btn primary" data-act="confirmar" data-id="${dr.id}">Confirmar</button><button class="btn" data-act="corrigir" data-id="${dr.id}" ${dr.editando?"disabled":""}>Corrigir</button></div>`;
+    const foot=`<div class="card-foot"><button class="btn primary" data-act="confirmar" data-id="${dr.id}">${ico("comprovada")}Confirmar</button><button class="btn" data-act="corrigir" data-id="${dr.id}" ${dr.editando?"disabled":""}>Corrigir</button></div>`;
     if(dr.kind==="despesa"){
-      const v=dr.desp;const vaz=["data","valorCentavos","descricao","tipo","favorecido"].filter(k=>v[k]==null||v[k]==="");
-      const parcial=v.dataParcial?`<div class="alert warn">Você escreveu a data ${pad(v.dataParcial.d)}/${pad(v.dataParcial.mo)} sem o ano. O app não completa o ano.<div class="row">${[2025,2026,2027].map(y=>`${y}-${pad(v.dataParcial.mo)}-${pad(v.dataParcial.d)}`).filter(i=>i>=PROJ.vigIni&&i<=PROJ.vigFim).map(i=>`<button class="btn sm" data-act="usardata" data-id="${dr.id}" data-v="${i}">Usar ${fmtData(i)}</button>`).join("")}</div></div>`:"";
+      const v=dr.desp;const vaz=CAMPOS_REQ.filter(k=>v[k]==null||v[k]==="");
+      const anos=[0,1,2,3].map(k=>+PROJ.vigIni.slice(0,4)+k);
+      const parcial=v.dataParcial?`<div class="alert warn">Você escreveu a data ${pad(v.dataParcial.d)}/${pad(v.dataParcial.mo)} sem o ano. O app não completa o ano.<div class="row">${anos.map(y=>`${y}-${pad(v.dataParcial.mo)}-${pad(v.dataParcial.d)}`).filter(i=>i>=PROJ.vigIni&&i<=PROJ.vigFim).map(i=>`<button class="btn sm" data-act="usardata" data-id="${dr.id}" data-v="${i}">Usar ${fmtData(i)}</button>`).join("")}</div></div>`:"";
       const dups=dr.dups&&dr.dups.length?`<div class="choices"><span class="eyebrow">Já existe despesa com o mesmo valor e data próxima</span>${dr.dups.map(d=>`<label class="choice"><input type="radio" name="mesclar-${dr.id}" value="${d.id}"${dr.mesclar===d.id?" checked":""}> <span>Atualizar esta despesa: ${rotDesp(d)}${d.origem==="extrato"?" <span class='muted'>(criada pelo extrato)</span>":""}</span></label>`).join("")}<label class="choice"><input type="radio" name="mesclar-${dr.id}" value="nova"${dr.mesclar==="nova"?" checked":""}> <span>Criar uma despesa nova</span></label></div>`:"";
-      return `<article class="card draft" data-draft="${dr.id}">${head}<p class="quote">${esc(dr.texto)}</p>${vaz.length?`<div class="alert warn">Não lido com segurança: ${vaz.map(k=>({data:"data",valorCentavos:"valor",descricao:"descrição",tipo:"tipo",favorecido:"favorecido"}[k])).join(", ")}. Preencha antes de confirmar ou deixe pendente.</div>`:""}${parcial}<fieldset ${dr.editando?"":"inert"}>${camposDespesa(v,true)}</fieldset>${dups}${foot}</article>`;
+      const nomes={data:"data",valorCentavos:"valor",descricao:"descrição",tipo:"tipo",favorecido:"favorecido"};
+      return `<article class="card draft" data-draft="${dr.id}">${head}<p class="quote">${esc(dr.texto)}</p>${vaz.length?`<div class="alert warn">Não lido com segurança: <b>${vaz.map(k=>nomes[k]).join(", ")}</b>. Preencha agora ou deixe pendente.</div>`:""}${parcial}<fieldset ${dr.editando?"":"inert"}>${camposDespesa(v,true)}</fieldset>${dups}${foot}</article>`;
     }
     if(dr.kind==="documento"||dr.kind==="manual"){
-      const cs=dr.cands||[];
-      const outros=S.despesas.filter(d=>!cs.some(c=>c.d.id===d.id));
+      const cs=dr.cands||[];const outros=S.despesas.filter(d=>!cs.some(c=>c.d.id===d.id));
       const vinc=`<div class="choices"><span class="eyebrow">A qual despesa este documento pertence?</span>
         ${cs.map(c=>`<label class="choice"><input type="radio" name="vinc-${dr.id}" value="${c.d.id}"${dr.vinculo===c.d.id?" checked":""}> <span>${rotDesp(c.d)}</span></label>`).join("")}
         ${outros.length?`<label class="choice"><input type="radio" name="vinc-${dr.id}" value="outra"${dr.vinculo==="outra"?" checked":""}> <span style="flex:1;min-width:0">Outra despesa: <select name="outra-${dr.id}">${outros.map(d=>`<option value="${d.id}">${rotDesp(d)}</option>`).join("")}</select></span></label>`:""}
@@ -734,24 +831,21 @@ function renderDrafts(){
       return `<article class="card draft" data-draft="${dr.id}">${head}${ileg}${obs}<fieldset ${dr.editando?"":"inert"}>${camposDoc(dr.campos,dr.tipoDoc,dr.kind!=="manual")}</fieldset>${vinc}${dr.kind==="documento"?nova:""}${foot}</article>`;
     }
     if(dr.kind==="extrato"){
-      const debs=dr.linhas;
-      const rows=debs.map(l=>{
-        const c=l.valorCentavos!=null&&l.natureza!=="credito"?candidatosLinha(l,new Set()):[];
+      const rows=dr.linhas.map(l=>{
+        const c=l.valorCentavos!=null&&l.natureza!=="credito"?candidatosLinha(l,new Set()):[];const resto=S.despesas.filter(d=>!c.includes(d));
         return `<tr data-linha="${l.id}"${l.natureza==="credito"?' class="muted"':""}>
           <td><input type="date" name="data" value="${esc(l.data)}"${!l.data?' style="background:var(--warn-bg)"':""}></td>
           <td><input type="text" name="descricao" value="${esc(l.descricao)}"></td>
           <td class="r"><input type="text" inputmode="decimal" name="valor" value="${esc(numBR(l.valorCentavos))}" style="text-align:right;${l.valorCentavos==null?"background:var(--warn-bg)":""}"></td>
           <td><select name="natureza"><option value="debito"${l.natureza==="debito"?" selected":""}>Débito</option><option value="credito"${l.natureza==="credito"?" selected":""}>Crédito</option><option value=""${!l.natureza?" selected":""}>?</option></select></td>
-          <td><select name="acao">
-            <option value="criar"${l.acao==="criar"?" selected":""}>Criar despesa pendente</option>
+          <td><select name="acao"><option value="criar"${l.acao==="criar"?" selected":""}>Criar despesa pendente</option>
             ${c.map(d=>`<option value="conc:${d.id}"${l.acao==="conc:"+d.id?" selected":""}>Conciliar: ${esc((d.descricao||d.favorecido||"").slice(0,40))} (${fmtData(d.data)})</option>`).join("")}
-            ${S.despesas.filter(d=>!c.includes(d)).length?`<optgroup label="Outra despesa">${S.despesas.filter(d=>!c.includes(d)).map(d=>`<option value="conc:${d.id}"${l.acao==="conc:"+d.id?" selected":""}>${esc((d.descricao||"").slice(0,40))} · ${brl(d.valorCentavos)}</option>`).join("")}</optgroup>`:""}
-            <option value="ignorar"${l.acao==="ignorar"?" selected":""}>Ignorar${l.nota?" ("+esc(l.nota)+")":""}</option>
-          </select></td></tr>`}).join("");
+            ${resto.length?`<optgroup label="Outra despesa">${resto.map(d=>`<option value="conc:${d.id}"${l.acao==="conc:"+d.id?" selected":""}>${esc((d.descricao||"").slice(0,40))} · ${brl(d.valorCentavos)}</option>`).join("")}</optgroup>`:""}
+            <option value="ignorar"${l.acao==="ignorar"?" selected":""}>Ignorar${l.nota?" ("+esc(l.nota)+")":""}</option></select></td></tr>`}).join("");
       return `<article class="card draft" data-draft="${dr.id}">${head}${ileg}${obs}
-        <p class="small muted">${debs.length} lançamento(s) lido(s). Campos em amarelo não foram lidos. Cada débito vira despesa pendente ou é conciliado com uma despesa de mesmo valor e data próxima (até 5 dias). Créditos são ignorados.</p>
-        ${debs.length?`<div class="scroll-x ext"><table><thead><tr><th>Data</th><th>Descrição</th><th class="r">Valor</th><th>Natureza</th><th>O que fazer</th></tr></thead><tbody>${rows}</tbody></table></div>`:`<div class="alert warn">Nenhum lançamento legível. Fotografe o extrato em partes, com boa luz e enquadrado.</div>`}
-        <div class="card-foot"><button class="btn primary" data-act="confirmar" data-id="${dr.id}"${debs.length?"":" disabled"}>Confirmar lançamentos</button></div></article>`;
+        <p class="small muted">${dr.linhas.length} lançamento(s) lido(s). Em amarelo, o que não foi lido. Cada débito vira despesa pendente ou é conciliado com despesa de mesmo valor e data próxima (até 5 dias). Créditos são ignorados.</p>
+        ${dr.linhas.length?`<div class="scroll-x ext"><table><thead><tr><th>Data</th><th>Descrição</th><th class="r">Valor</th><th>Natureza</th><th>O que fazer</th></tr></thead><tbody>${rows}</tbody></table></div>`:`<div class="alert warn">Nenhum lançamento legível. Fotografe o extrato em partes, com boa luz.</div>`}
+        <div class="card-foot"><button class="btn primary" data-act="confirmar" data-id="${dr.id}"${dr.linhas.length?"":" disabled"}>Confirmar lançamentos</button></div></article>`;
     }
     return "";
   }).join("");
@@ -759,8 +853,8 @@ function renderDrafts(){
 function syncDraft(dr){
   const root=document.querySelector(`[data-draft="${dr.id}"]`);if(!root)return;
   if(dr.kind==="despesa"){dr.desp=Object.assign(dr.desp,lerDespesa(root));const r=root.querySelector(`[name="mesclar-${dr.id}"]:checked`);if(r)dr.mesclar=r.value}
-  if(dr.kind==="documento"||dr.kind==="manual"){const x=lerDoc(root);dr.tipoDoc=x.tipoDoc;dr.campos=x.campos;const r=root.querySelector(`[name="vinc-${dr.id}"]:checked`);if(r)dr.vinculo=r.value;const det=root.querySelector("details .grid");if(det&&dr.desp)dr.desp=Object.assign(dr.desp,lerDespesa(det.parentElement))}
-  if(dr.kind==="extrato"){root.querySelectorAll("tr[data-linha]").forEach(tr=>{const l=dr.linhas.find(x=>x.id===tr.dataset.linha);const g=n=>tr.querySelector(`[name="${n}"]`).value.trim();l.data=g("data");l.descricao=g("descricao");l.valorCentavos=(v=>v==null?null:Math.abs(v))(parseValor(g("valor")));l.natureza=g("natureza");l.acao=g("acao")})}
+  if(dr.kind==="documento"||dr.kind==="manual"){const x=lerDoc(root.querySelector("fieldset"));dr.tipoDoc=x.tipoDoc;dr.campos=x.campos;const r=root.querySelector(`[name="vinc-${dr.id}"]:checked`);if(r)dr.vinculo=r.value;const det=root.querySelector("details");if(det&&dr.desp)dr.desp=Object.assign(dr.desp,lerDespesa(det))}
+  if(dr.kind==="extrato"){root.querySelectorAll("tr[data-linha]").forEach(tr=>{const l=dr.linhas.find(x=>x.id===tr.dataset.linha);const g=n=>tr.querySelector(`[name="${n}"]`).value.trim();l.data=g("data");l.descricao=g("descricao");const v=parseValor(g("valor"));l.valorCentavos=v==null?null:Math.abs(v);l.natureza=g("natureza");l.acao=g("acao")})}
 }
 function novaDespesa(v,origem,extra){
   const now=new Date().toISOString();
@@ -772,23 +866,18 @@ async function confirmarDraft(dr){
   try{
     if(dr.kind==="despesa"){
       const v=limpaDesp(dr.desp);
-      if(dr.mesclar&&dr.mesclar!=="nova"){
-        const ex=S.despesas.find(d=>d.id===dr.mesclar);
-        if(ex){const m=Object.assign({},ex);for(const[k,val]of Object.entries(v)){if(val!==""&&val!=null&&val!==false)m[k]=val}m.atualizadoEm=new Date().toISOString();await persist("despesas",m);fimConfirm(dr,m);return}
-      }
+      if(dr.mesclar&&dr.mesclar!=="nova"){const ex=S.despesas.find(d=>d.id===dr.mesclar);if(ex){const m=Object.assign({},ex);for(const[k,val]of Object.entries(v))if(val!==""&&val!=null&&val!==false)m[k]=val;m.atualizadoEm=new Date().toISOString();await persist("despesas",m);fimConfirm(dr,m);return}}
       const d=novaDespesa(v,"texto");await persist("despesas",d);fimConfirm(dr,d);
     }else if(dr.kind==="documento"||dr.kind==="manual"){
       const doc={id:uid(),tipo:dr.tipoDoc,arquivo:dr.arquivo||null,campos:dr.campos,registradoEm:new Date().toISOString()};
       let alvo=dr.vinculo;
       if(alvo==="outra"){const s=document.querySelector(`[name="outra-${dr.id}"]`);alvo=s&&s.value}
       if(!alvo||alvo==="nova"){
-        const base=limpaDesp(dr.desp||{});
-        if(!base.data)base.data=dr.campos.data;if(base.valorCentavos==null)base.valorCentavos=dr.campos.valorCentavos;
+        const base=limpaDesp(dr.desp||{});if(!base.data)base.data=dr.campos.data;if(base.valorCentavos==null)base.valorCentavos=dr.campos.valorCentavos;
         const d=novaDespesa(base,"documento",{documentos:[doc]});await persist("despesas",d);fimConfirm(dr,d);
       }else{
         const ex=S.despesas.find(d=>d.id===alvo);if(!ex){toast("Despesa não encontrada.");return}
-        const m=Object.assign({},ex,{documentos:[...(ex.documentos||[]),doc],atualizadoEm:new Date().toISOString()});
-        await persist("despesas",m);fimConfirm(dr,m);
+        const m=Object.assign({},ex,{documentos:[...(ex.documentos||[]),doc],atualizadoEm:new Date().toISOString()});await persist("despesas",m);fimConfirm(dr,m);
       }
     }else if(dr.kind==="extrato"){
       let nC=0,nN=0;
@@ -796,16 +885,12 @@ async function confirmarDraft(dr){
         if(l.acao==="ignorar"||l.natureza==="credito")continue;
         const linha={id:uid(),data:l.data,descricao:l.descricao,valorCentavos:l.valorCentavos,arquivo:dr.arquivo,despesaId:null,importadoEm:new Date().toISOString()};
         if(l.acao&&l.acao.startsWith("conc:")){linha.despesaId=l.acao.slice(5);nC++}
-        else{
-          const taxa=RX.tarifa.test(norm(l.descricao));
-          const d=novaDespesa({data:l.data,valorCentavos:l.valorCentavos,descricao:l.descricao,tipo:taxa?"taxa_bancaria":""},"extrato");
-          await persist("despesas",d);linha.despesaId=d.id;nN++;
-        }
+        else{const d=novaDespesa({data:l.data,valorCentavos:l.valorCentavos,descricao:l.descricao,tipo:RX.tarifa.test(norm(l.descricao))?"taxa_bancaria":""},"extrato");await persist("despesas",d);linha.despesaId=d.id;nN++}
         await persist("extrato",linha);
       }
       drafts=drafts.filter(x=>x!==dr);renderDrafts();toast(`${nC} conciliado(s), ${nN} despesa(s) pendente(s) criada(s).`);
     }
-  }catch(e){/* toast já exibido */}
+  }catch(e){}
 }
 function fimConfirm(dr,d){
   drafts=drafts.filter(x=>x!==dr);renderDrafts();
@@ -815,48 +900,73 @@ function fimConfirm(dr,d){
 }
 
 /* ================= TELAS ================= */
-let TAB="painel";const UI={filtroEstado:"",filtroRub:"",busca:"",aberto:null,confirmDel:null};
-let chat=[];let chatCtl=null;let chatBusy=false;
+let TAB="painel",TAB_ANT=null;const UI={filtroEstado:"",filtroRub:"",busca:"",aberto:null,confirmDel:null};
+let chat=[],chatCtl=null,chatBusy=false;
+const LAST={};
 function pill(e){return `<span class="pill st-${e}">${ESTADOS[e]}</span>`}
-function barra(ap,o){
-  const p=x=>Math.max(0,Math.min(100,x/ap*100));
-  const disp=ap-o.gasto-o.pendente-o.irregular;
-  return `<div class="bar" role="img" aria-label="Gasto ${brl(o.gasto)}, pendente ${brl(o.pendente)}, irregular ${brl(o.irregular)}, disponível ${brl(disp)}"><i class="g" style="width:${p(o.gasto)}%"></i><i class="p" style="width:${p(o.pendente)}%"></i><i class="x" style="width:${p(o.irregular)}%"></i></div>
-  <div class="bar-legend"><div><span><i class="dot" style="background:var(--line)"></i>Aprovado</span><span class="num">${brl(ap)}</span></div><div><span><i class="dot" style="background:var(--ok)"></i>Gasto comprovado</span><span class="num">${brl(o.gasto)}</span></div><div><span><i class="dot" style="background:var(--warn-bar)"></i>Pendente${o.irregular?" + irregular":""}</span><span class="num">${brl(o.pendente+o.irregular)}</span></div><div><span><i class="dot" style="background:var(--soft);outline:1px solid var(--line)"></i>Disponível</span><span class="num" style="${disp<0?"color:var(--bad)":""}">${brl(disp)}</span></div></div>`;
+function cnt(key,c,cls){return `<span class="${cls||""}" data-count="${c}" data-key="${key}">${brl(c)}</span>`}
+function animarNumeros(root){
+  const reduz=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  root.querySelectorAll("[data-count]").forEach(el=>{
+    const key=el.dataset.key,to=+el.dataset.count,from=LAST[key]==null?0:LAST[key];LAST[key]=to;
+    if(reduz||from===to)return;
+    const t0=performance.now(),dur=750;
+    const step=t=>{const k=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-k,3);el.textContent=brl(Math.round(from+(to-from)*e));if(k<1)requestAnimationFrame(step)};
+    requestAnimationFrame(step);
+  });
+}
+function hero(C){
+  const comp=PROJ.total-C.disp.total;const pct=PROJ.total?Math.max(0,Math.min(100,comp/PROJ.total*100)):0;
+  const R=46,L=2*Math.PI*R;
+  return `<div class="hero">
+    <div style="position:relative;z-index:1;min-width:0">
+      <span class="eyebrow">Saldo disponível</span>
+      <div class="big">${cnt("h-total",C.disp.total)}</div>
+      <p class="sub">de ${brl(PROJ.total)} aprovados</p>
+      <div class="hero-stats">
+        <div class="hero-stat"><small>Custeio</small><b>${cnt("h-cust",C.disp.custeio)}</b></div>
+        <div class="hero-stat"><small>Capital</small><b>${cnt("h-cap",C.disp.capital)}</b></div>
+        <div class="hero-stat"><small>Comprovado</small><b>${cnt("h-comp",C.nat.custeio.gasto+C.nat.capital.gasto)}</b></div>
+      </div>
+    </div>
+    <div class="ring" role="img" aria-label="${Math.round(pct)}% do orçamento comprometido"><svg viewBox="0 0 110 110"><circle cx="55" cy="55" r="${R}" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="12"/><circle cx="55" cy="55" r="${R}" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-dasharray="${L}" stroke-dashoffset="${L*(1-pct/100)}" style="transition:stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1)"/></svg><div class="lbl"><div>${Math.round(pct)}%<small>usado</small></div></div></div>
+  </div>`;
 }
 function proxPrazo(){const h=hojeISO();return PRAZOS.find(p=>p[0]>=h)}
+function barra(ap,o){
+  const p=x=>ap?Math.max(0,Math.min(100,x/ap*100)):0;
+  return `<div class="bar" role="img" aria-label="Comprovado ${brl(o.gasto)}, pendente ${brl(o.pendente)}, irregular ${brl(o.irregular)}"><i class="g" style="width:${p(o.gasto)}%"></i><i class="p" style="width:${p(o.pendente)}%"></i><i class="x" style="width:${p(o.irregular)}%"></i></div>`;
+}
 function viewPainel(C){
   const pp=proxPrazo();const h=hojeISO();
   const totSoma=RUBRICAS.reduce((s,r)=>s+r.aprovado,0),itSoma=ITENS.reduce((s,i)=>s+i.total,0);
+  const decor=Math.max(0,Math.min(100,diasEntre(PROJ.vigIni,h)/Math.max(1,diasEntre(PROJ.vigIni,PROJ.vigFim))*100));
   return `
   ${totSoma!==PROJ.total||itSoma!==PROJ.total?`<div class="banner bad">A soma das rubricas (${brl(totSoma)}) ou dos itens (${brl(itSoma)}) não bate com o total aprovado (${brl(PROJ.total)}). Confira o plano de trabalho.</div>`:""}
   <section class="block">
-    <div class="sec-head"><h2>Saldo disponível</h2><span class="hint">aprovado menos gasto, pendente e irregular</span></div>
-    <div class="kpis">
-      <div class="kpi"><span class="eyebrow">Total</span><span class="v">${brl(C.disp.total)}</span><span class="s">de ${brl(PROJ.total)}</span></div>
-      <div class="kpi"><span class="eyebrow">Custeio</span><span class="v">${brl(C.disp.custeio)}</span><span class="s">de ${brl(PROJ.custeio)}</span></div>
-      <div class="kpi"><span class="eyebrow">Capital</span><span class="v">${brl(C.disp.capital)}</span><span class="s">de ${brl(PROJ.capital)}</span></div>
-    </div>
-  </section>
-  <section class="block">
-    <h2>Despesas por estado</h2>
-    <div class="states">${["pendente","comprovada","irregular","fapemat"].map(e=>`<button class="state st-${e}" data-act="filtrar" data-v="${e}"><b>${C.cont[e]}</b><span>${ESTADOS[e]}</span></button>`).join("")}</div>
-    ${!S.despesas.length?`<div class="empty"><b>Nenhuma despesa registrada.</b><span>Escreva um gasto no campo acima (ex.: "paguei 302,50 de diária para Cuiabá dia 12/03/2026") ou anexe a foto de uma nota ou extrato.</span></div>`:""}
+    <div class="sec-head"><h2>Suas despesas</h2><span class="hint">toque para filtrar</span></div>
+    <div class="states">${["pendente","comprovada","irregular","fapemat"].map(e=>`<button class="state st-${e}" data-act="filtrar" data-v="${e}"><div class="top"><b>${C.cont[e]}</b><span class="ic">${ico(e,20)}</span></div><span>${ESTADOS[e]}</span></button>`).join("")}</div>
+    ${!S.despesas.length?`<div class="empty"><b>Nenhuma despesa ainda</b><span>Escreva um gasto no campo acima, por exemplo "paguei 302,50 de diária para Cuiabá dia 12/03/2026"${IMG?", ou toque em Foto para ler uma nota ou extrato":""}.</span></div>`:""}
   </section>
   <section class="block">
     <h2>Prazos</h2>
-    ${pp?`<div class="deadline"><div><span class="eyebrow">Próximo prazo · ${fmtData(pp[0])}</span><h3>${esc(pp[1])}</h3></div><div class="right"><span class="days">${diasEntre(h,pp[0])}</span> <span class="muted">dias</span></div></div>`:`<div class="banner bad">Todos os prazos venceram.</div>`}
-    <div class="dl-list">${PRAZOS.map(([d,n])=>{const k=diasEntre(h,d);return `<div><span>${esc(n)}</span><span class="num ${k<0?"muted":""}">${fmtData(d)} · ${k<0?"vencido":k===0?"hoje":k+" dias"}</span></div>`}).join("")}</div>
+    ${pp?`<div class="deadline"><div><span class="eyebrow">Próximo prazo · ${fmtData(pp[0])}</span><h3 style="font-size:1.25rem;margin-top:4px">${esc(pp[1])}</h3></div><div class="days">${diasEntre(h,pp[0])}<small>dias</small></div>
+      <div class="timeline"><div class="row small" style="justify-content:space-between;color:#d7deea"><span>Vigência ${vig()}</span><span>${Math.round(decor)}% do tempo</span></div><div class="track"><i style="width:${decor}%"></i></div></div></div>`:`<div class="banner bad">Todos os prazos venceram.</div>`}
+    <div class="dl-list">${PRAZOS.map(([d,n])=>{const k=diasEntre(h,d);return `<div class="dl ${k<0?"vencido":k<=60?"urg":""}"><div><div class="small" style="font-weight:700">${esc(n)}</div><div class="hint">${fmtData(d)}</div></div><b>${k<0?"vencido":k===0?"hoje":k+" dias"}</b></div>`}).join("")}</div>
   </section>
   <section class="block">
-    <h2>Rubricas</h2>
-    <div class="bars">${RUBRICAS.map(r=>`<div class="bar-row"><div class="bar-head"><h3>${esc(r.nome)}</h3><span class="hint">${r.natureza==="capital"?"Capital":"Custeio"}</span></div>${barra(r.aprovado,C.porRub[r.id])}</div>`).join("")}
-    ${C.usado(C.sem)?`<div class="bar-row"><div class="bar-head"><h3>Sem rubrica (taxas bancárias e despesas sem tipo)</h3><span class="hint">abatido do custeio</span></div><p class="num">${brl(C.usado(C.sem))}</p></div>`:""}</div>
+    <div class="sec-head"><h2>Rubricas</h2><span class="row small muted"><span><i class="dot" style="background:var(--ok)"></i>comprovado</span><span><i class="dot" style="background:var(--warn)"></i>pendente</span><span><i class="dot" style="background:var(--bad)"></i>irregular</span></span></div>
+    <div class="rub-grid">${RUBRICAS.map(r=>{const o=C.porRub[r.id];const disp=r.aprovado-C.usado(o);return `<div class="rub" style="--c:${corRub(r.id)}">
+      <span class="tag">${r.natureza==="capital"?"Capital":"Custeio"}</span><h3>${esc(r.nome)}</h3>
+      <div><span class="hint">disponível</span><div class="avail ${disp<0?"neg":""}">${cnt("r-"+r.id,disp)}</div></div>
+      ${barra(r.aprovado,o)}
+      <div class="legend"><div><span>Aprovado</span><span class="num">${brl(r.aprovado)}</span></div><div><span>Comprovado</span><span class="num">${brl(o.gasto)}</span></div><div><span>Pendente${o.irregular?" + irreg.":""}</span><span class="num">${brl(o.pendente+o.irregular)}</span></div></div></div>`}).join("")}</div>
+    ${C.usado(C.sem)?`<div class="banner info">Sem rubrica (taxas bancárias e despesas sem tipo): <b class="num">${brl(C.usado(C.sem))}</b>, abatido do custeio.</div>`:""}
   </section>`;
 }
 function linhaFaltas(a){
   const p=[];
-  if(a.erros.length)p.push(`<span class="missing bad">${a.erros.length} alerta(s): ${esc(a.erros[0].norma)}</span>`);
+  if(a.erros.length)p.push(`<span class="missing bad">${a.erros.length} alerta(s) · ${esc(a.erros[0].norma)}</span>`);
   const f=[...a.campos.map(c=>"preencher "+c),...a.faltas.map(t=>DOCS[t]),...a.perguntas.map(()=>"responder sobre parentesco")];
   if(f.length)p.push(`<span class="missing">Falta: ${esc(f.join(" · "))}</span>`);
   if(a.cinzas.length)p.push(`<span class="missing" style="color:var(--gray)">Confirmar com a FAPEMAT</span>`);
@@ -869,23 +979,23 @@ function viewLanc(C){
   if(UI.busca){const q=norm(UI.busca);L=L.filter(d=>norm([d.descricao,d.favorecido,d.docFavorecido,numBR(d.valorCentavos)].join(" ")).includes(q))}
   const tot=L.reduce((s,d)=>s+(d.valorCentavos||0),0);
   return `<section class="block">
-    <div class="sec-head"><h2>Lançamentos</h2><button class="btn sm" data-act="novadesp">Nova despesa manual</button></div>
+    <div class="sec-head"><h2>Lançamentos</h2><button class="btn sm" data-act="novadesp">+ Despesa manual</button></div>
+    <div class="chips"><button class="fchip" data-act="festado" data-v="" aria-pressed="${!UI.filtroEstado}">Todas</button>${Object.entries(ESTADOS).map(([k,n])=>`<button class="fchip" data-act="festado" data-v="${k}" aria-pressed="${UI.filtroEstado===k}">${n} · ${C.cont[k]}</button>`).join("")}</div>
     <div class="filters">
-      <select id="fEstado" aria-label="Filtrar por estado"><option value="">Todos os estados</option>${Object.entries(ESTADOS).map(([k,n])=>`<option value="${k}"${UI.filtroEstado===k?" selected":""}>${n}</option>`).join("")}</select>
       <select id="fRub" aria-label="Filtrar por rubrica"><option value="">Todas as rubricas</option>${RUBRICAS.map(r=>`<option value="${r.id}"${UI.filtroRub===r.id?" selected":""}>${esc(r.nome)}</option>`).join("")}<option value="sem"${UI.filtroRub==="sem"?" selected":""}>Sem rubrica</option></select>
       <input id="fBusca" type="text" placeholder="Buscar descrição, favorecido, valor" value="${esc(UI.busca)}" aria-label="Buscar">
     </div>
-    <div class="row" style="justify-content:space-between"><span class="hint">${L.length} despesa(s)</span><span class="num small">${brl(tot)}</span></div>
-    ${L.length?`<div class="list">${L.map(d=>itemLanc(d,C.av.get(d.id))).join("")}</div>`:`<div class="empty"><b>${S.despesas.length?"Nenhuma despesa com esses filtros.":"Nenhuma despesa registrada."}</b><span>${S.despesas.length?"Limpe os filtros para ver todas.":"Use o campo no topo ou o botão Nova despesa manual."}</span></div>`}
+    <div class="row" style="justify-content:space-between"><span class="hint">${L.length} despesa(s)</span><span class="num">${brl(tot)}</span></div>
+    ${L.length?`<div class="list">${L.map(d=>itemLanc(d,C.av.get(d.id))).join("")}</div>`:`<div class="empty"><b>${S.despesas.length?"Nada com esses filtros":"Nenhuma despesa ainda"}</b><span>${S.despesas.length?"Toque em Todas para limpar os filtros.":"Use o campo no topo ou + Despesa manual."}</span></div>`}
   </section>`;
 }
 function itemLanc(d,a){
-  const it=ITEM[d.itemId];const aberto=UI.aberto===d.id;
-  return `<div class="item" id="it-${d.id}">
+  const it=ITEM[d.itemId];const aberto=UI.aberto===d.id;const T=TIPOS[d.tipo];const rub=it?it.rubrica:T&&T.rubrica;
+  return `<div class="item${a.estado==="irregular"?" irr":""}" id="it-${d.id}">
    <button class="item-head" data-act="abrir" data-id="${d.id}" aria-expanded="${aberto}">
-     <span class="stripe" style="background:${EST_COR[a.estado]}"></span>
+     <span class="ic" style="background:${rub?corRub(rub):"var(--gray)"}">${T?T.sigla:"?"}</span>
      <span class="main"><span class="title">${esc(d.descricao||d.favorecido||"Despesa sem descrição")}</span>
-       <span class="sub">${fmtData(d.data)} · ${esc(TIPOS[d.tipo]?TIPOS[d.tipo].nome:"sem tipo")}${it?" · "+esc(it.nome):""}${d.favorecido&&d.descricao?" · "+esc(d.favorecido):""}</span>
+       <span class="sub">${fmtData(d.data)} · ${esc(it?it.nome:T?T.nome:"sem tipo")}${d.favorecido&&d.descricao?" · "+esc(d.favorecido):""}</span>
        ${linhaFaltas(a)}</span>
      <span class="val"><span class="num">${brl(d.valorCentavos)}</span>${pill(a.estado)}</span>
    </button>
@@ -900,9 +1010,7 @@ function detalhe(d,a){
     ...a.perguntas.map(p=>`<div class="alert warn"><b>O sobrenome "${esc(p.sobrenome)}" coincide com o de ${esc(p.membro)}, da equipe.</b><span>O favorecido é cônjuge ou parente até 3º grau de alguém da equipe? (item 3.13 c e d)</span><div class="row"><button class="btn sm" data-act="parentesco" data-id="${d.id}" data-v="nao">Não é parente</button><button class="btn sm danger" data-act="parentesco" data-id="${d.id}" data-v="sim">É parente</button></div></div>`),
     ...a.infos.map(i=>`<div class="alert ok"><span>${esc(i.msg)}</span>${i.just?`<span class="small">Registro: ${esc(i.just)}</span>`:""}</div>`)
   ].join("");
-  const docs=d.documentos||[];
-  const req=T?T.docs:[];
-  const linhas=linhasDe(d);
+  const docs=d.documentos||[];const req=T?T.docs:[];const linhas=linhasDe(d);
   const docList=`<div class="docs">
     ${req.map(t=>{const have=t==="extrato"?linhas:docsDe(d,t);return have.length?have.map(x=>t==="extrato"?`<div class="doc"><span>✓ ${DOCS.extrato}: ${fmtData(x.data)} · ${esc(x.descricao)} · <span class="num">${brl(x.valorCentavos)}</span></span></div>`:docRow(d,x)).join(""):`<div class="doc missing-doc"><span>Falta: ${esc(DOCS[t])}</span><button class="btn sm" data-act="anexardoc" data-id="${d.id}" data-t="${t}">Anexar</button></div>`}).join("")}
     ${docs.filter(x=>!req.includes(x.tipo)).map(x=>docRow(d,x)).join("")}
@@ -922,22 +1030,17 @@ function detalhe(d,a){
     </div>
   </div>`;
 }
-function docRow(d,x){
-  const c=x.campos||{};
-  return `<div class="doc"><span>✓ ${esc(DOCS[x.tipo]||x.tipo)}${c.numero?" nº "+esc(c.numero):""}${c.data?" · "+fmtData(c.data):""}${c.valorCentavos!=null?` · <span class="num">${brl(c.valorCentavos)}</span>`:""}${x.arquivo?` <span class="muted small">(${esc(x.arquivo)})</span>`:""}</span><button class="btn sm ghost" data-act="remdoc" data-id="${d.id}" data-doc="${x.id}">Remover</button></div>`;
-}
-function dispensaUI(d,e){
-  return `<details><summary class="small">Este alerta não se aplica</summary><div class="row" style="padding-top:8px"><input type="text" data-just="${d.id}|${esc(e.cod)}" placeholder="Justifique (fica registrado na exportação)" style="flex:1;min-width:200px"><button class="btn sm" data-act="dispensar" data-id="${d.id}" data-cod="${esc(e.cod)}">Registrar</button></div></details>`;
-}
+function docRow(d,x){const c=x.campos||{};return `<div class="doc"><span>✓ ${esc(DOCS[x.tipo]||x.tipo)}${c.numero?" nº "+esc(c.numero):""}${c.data?" · "+fmtData(c.data):""}${c.valorCentavos!=null?` · <span class="num">${brl(c.valorCentavos)}</span>`:""}${x.arquivo?` <span class="small" style="opacity:.7">(${esc(x.arquivo)})</span>`:""}</span><button class="btn sm ghost" data-act="remdoc" data-id="${d.id}" data-doc="${x.id}">Remover</button></div>`}
+function dispensaUI(d,e){return `<details><summary class="small">Este alerta não se aplica</summary><div class="row" style="padding-top:8px"><input type="text" data-just="${d.id}|${esc(e.cod)}" placeholder="Justifique (fica registrado na exportação)" style="flex:1;min-width:200px"><button class="btn sm" data-act="dispensar" data-id="${d.id}" data-cod="${esc(e.cod)}">Registrar</button></div></details>`}
 function viewOrc(C){
   return RUBRICAS.map(r=>{
     const its=ITENS.filter(i=>i.rubrica===r.id);const o=C.porRub[r.id];
-    return `<section class="block"><div class="sec-head"><h2>${esc(r.nome)}</h2><span class="hint">${r.natureza==="capital"?"Capital":"Custeio"} · aprovado <span class="num">${brl(r.aprovado)}</span> · disponível <span class="num">${brl(r.aprovado-C.usado(o))}</span></span></div>
+    return `<section class="block" style="--c:${corRub(r.id)}"><div class="sec-head"><h2><i class="dot" style="background:var(--c);width:12px;height:12px;border-radius:4px"></i>${esc(r.nome)}</h2><span class="hint">${r.natureza==="capital"?"Capital":"Custeio"} · disponível <span class="num" style="color:var(--ink)">${brl(r.aprovado-C.usado(o))}</span> de ${brl(r.aprovado)}</span></div>
     <div class="budget"><div class="b-row h"><div>Item</div><div class="right">Aprovado</div><div class="right">Comprometido</div><div class="right">Saldo</div></div>
-    ${its.map(i=>{const u=C.porItem[i.id];const used=C.usado(u);const s=i.total-used;
-      return `<div class="b-row"><div><div>${esc(i.nome)}${i.generica?' <span class="pill st-fapemat">confirmar com a FAPEMAT</span>':""}</div><div class="q">${fmtQtd(i.qtd)} ${esc(i.unid)} × ${brl(i.unit)}${r.id==="diarias"?` · usadas ${fmtQtd(u.qtd)} de ${fmtQtd(i.qtd)}`:""}${u.n?` · ${u.n} despesa(s)`:""}</div></div>
+    ${its.map(i=>{const u=C.porItem[i.id];const used=C.usado(u);const s=i.total-used;const pc=i.total?Math.min(100,used/i.total*100):0;
+      return `<div class="b-row"><div><div style="font-weight:600">${esc(i.nome)}${i.generica?' <span class="pill st-fapemat">confirmar com a FAPEMAT</span>':""}</div><div class="q">${fmtQtd(i.qtd)} ${esc(i.unid)} × ${brl(i.unit)}${r.id==="diarias"?` · usadas ${fmtQtd(u.qtd)} de ${fmtQtd(i.qtd)}`:""}${u.n?` · ${u.n} despesa(s)`:""}</div><div class="mini"><i style="width:${pc}%"></i></div></div>
       <div class="right num"><span class="lbl">Aprovado</span>${brl(i.total)}</div><div class="right num"><span class="lbl">Comprometido</span>${brl(used)}</div><div class="right num ${s<0?"neg":""}"><span class="lbl">Saldo</span>${brl(s)}</div></div>`}).join("")}
-    </div></section>`}).join("")+`<p class="hint">Comprometido = comprovado + pendente + a confirmar + irregular. Um gasto irregular continua contando até ser excluído ou devolvido.</p>`;
+    </div></section>`}).join("")+`<p class="hint">Comprometido = comprovado + pendente + a confirmar + irregular. Gasto irregular continua contando até ser excluído ou devolvido.</p>`;
 }
 function contextoAssistente(C){
   const h=hojeISO();
@@ -947,22 +1050,23 @@ COMO RESPONDER:
 - Se as regras abaixo não cobrirem o caso com clareza, responda "Não sei, confirme com a FAPEMAT." e diga qual pergunta levar à Fundação.
 - Para "posso gastar com X?": diga sim, não ou não sei; o item da norma; em qual item do orçamento cabe e o saldo dele (copie o número dado abaixo, não recalcule); os documentos exigidos.
 - Não faça contas de saldo novas além de comparar um valor com um saldo informado. Não invente valores, datas ou itens.
-PROJETO: ${PROJ.nome}. Processo ${PROJ.processo}. ${PROJ.edital}. Coordenador ${PROJ.coord} (${PROJ.inst}). Vigência 19/11/2025 a 18/11/2027. Hoje: ${fmtData(h)}.
+PROJETO: ${PROJ.nome}. Processo ${PROJ.processo}. ${PROJ.edital}. Coordenador ${PROJ.coord} (${PROJ.inst}). Vigência ${vig()}. Hoje: ${fmtData(h)}.
 Total ${brl(PROJ.total)}; custeio ${brl(PROJ.custeio)}; capital ${brl(PROJ.capital)}.
 SALDOS CALCULADOS PELO APP (disponível = aprovado − comprometido): total ${brl(C.disp.total)}; custeio ${brl(C.disp.custeio)}; capital ${brl(C.disp.capital)}.
 ${RUBRICAS.map(r=>`Rubrica ${r.nome} (${r.natureza}): aprovado ${brl(r.aprovado)}, disponível ${brl(r.aprovado-C.usado(C.porRub[r.id]))}`).join("\n")}
 ITENS (aprovado / disponível):
-${ITENS.map(i=>`- [${RUB[i.rubrica].nome}] ${i.nome}: ${fmtQtd(i.qtd)} ${i.unid} × ${brl(i.unit)} = ${brl(i.total)} / disponível ${brl(i.total-C.usado(C.porItem[i.id]))}${i.generica?" (linha genérica sem especificação: qualquer gasto aqui deve ser confirmado com a FAPEMAT)":""}`).join("\n")}
+${ITENS.map(i=>`- [${RUB[i.rubrica]?RUB[i.rubrica].nome:i.rubrica}] ${i.nome}: ${fmtQtd(i.qtd)} ${i.unid} × ${brl(i.unit)} = ${brl(i.total)} / disponível ${brl(i.total-C.usado(C.porItem[i.id]))}${i.generica?" (linha genérica sem especificação: qualquer gasto aqui deve ser confirmado com a FAPEMAT)":""}`).join("\n")}
 DESPESAS: ${C.cont.comprovada} comprovadas, ${C.cont.pendente} pendentes, ${C.cont.irregular} irregulares, ${C.cont.fapemat} a confirmar com a FAPEMAT.
 EQUIPE (não pode receber por serviço): ${EQUIPE.join("; ")}.
+PRAZOS: ${PRAZOS.map(p=>`${p[1]}: ${fmtData(p[0])}`).join("; ")}.
 REGRAS:
 - 3.13 b: despesa só dentro da vigência.
 - 3.8: nota fiscal em nome e CPF do beneficiário (coordenador), com o número do processo ${PROJ.processo}, data e descrição detalhada.
-- 3.1 e 3.14: só despesas com item no orçamento aprovado e dentro do saldo do item; fora disso, remanejamento prévio (pedido até 19/09/2027).
+- 3.1 e 3.14: só despesas com item no orçamento aprovado e dentro do saldo do item; fora disso, remanejamento prévio.
 - 3.2: saldo de capital não paga custeio e vice-versa.
 - 3.13 c e d: vedado pagar serviço ao coordenador, membro da equipe, bolsista, cônjuge ou parente até 3º grau.
-- 3.6: diária de R$ 302,50 em MT e R$ 581,00 fora de MT.
-- 3.13 c: vedada diária ao coordenador com destino a Cáceres.
+- 3.6: diária de ${brl(PROJ.diariaDentro)} em ${PROJ.uf} e ${brl(PROJ.diariaFora)} fora de ${PROJ.uf}.
+- 3.13 c: vedada diária ao coordenador com destino a ${PROJ.sede||"sua cidade de lotação"}.
 - 3.6.1: vedado pagar hospedagem ou refeição à parte em viagem com diária.
 - 3.13 h: vedado alimentação, coffee break, coquetel, ornamentação, shows.
 - 3.13 f e j: vedado multa, juros, correção monetária, taxa de remarcação ou cancelamento de passagem.
@@ -970,82 +1074,77 @@ REGRAS:
 - 3.13 g: vedada obra de construção civil.
 - 3.13 l: vedado serviço de revisão ou tradução de texto, análise de dados ou elaboração de relatório.
 - 3.4.1: um pagamento por despesa; saque em dinheiro só com justificativa.
-- Gastos na linha genérica de material de consumo (R$ 64.800,00), item que pareça permanente lançado em consumo e diária fracionada: confirmar com a FAPEMAT.
-DOCUMENTOS EXIGIDOS: material de consumo e serviço PJ: nota fiscal + comprovante de pagamento. Serviço PF: Recibo de Serviços de Terceiros Pessoa Física + comprovante. Diária: Recibo de Diária + comprovante. Passagem aérea: bilhete eletrônico, fatura da agência ou companhia e comprovante de embarque. Equipamento: nota fiscal, comprovante e termo de incorporação ao patrimônio da UNEMAT. Recomendado (não obrigatório): três orçamentos para equipamentos e serviços.`;
+- Gastos na linha genérica de material de consumo, item que pareça permanente lançado em consumo e diária fracionada: confirmar com a FAPEMAT.
+DOCUMENTOS EXIGIDOS: material de consumo e serviço PJ: nota fiscal + comprovante de pagamento. Serviço PF: Recibo de Serviços de Terceiros Pessoa Física + comprovante. Diária: Recibo de Diária + comprovante. Passagem aérea: bilhete eletrônico, fatura da agência ou companhia e comprovante de embarque. Equipamento: nota fiscal, comprovante e termo de incorporação ao patrimônio. Recomendado (não obrigatório): três orçamentos para equipamentos e serviços.`;
 }
 function viewAssist(){
-  return `<section class="block"><div class="sec-head"><h2>Assistente</h2><span class="hint">responde com base no orçamento, nos saldos e nas regras acima; não grava nada</span></div>
-  ${!AI?`<div class="banner ${AI_STATE==="carregando"?"info":"warn"}">${AI_STATE==="carregando"?"Carregando o Claude…":"O Claude não está disponível nesta visualização."}</div>`:""}
-  <div class="chat" id="chatLog">${chat.length?chat.map(m=>`<div class="msg ${m.role==="user"?"u":"a"}">${esc(m.content)}</div>`).join(""):`<div class="empty"><b>Pergunte, por exemplo:</b><div class="row">${["Posso comprar uma impressora?","Posso pagar o almoço da equipe em campo?","Quanto ainda tenho de diárias para Sinop?"].map(q=>`<button class="btn sm" data-act="perg" data-v="${esc(q)}">${esc(q)}</button>`).join("")}</div></div>`}
+  if(!AI)return `<section class="block"><h2>Assistente</h2><div class="empty"><b>O assistente usa o Claude</b><span>${AI_STATE==="carregando"?"Carregando o Claude…":"Fora do Claude não há IA disponível. Saldos, validações e alertas continuam funcionando aqui."}</span></div></section>`;
+  return `<section class="block"><div class="sec-head"><h2>Assistente</h2><span class="hint">responde com base no orçamento, nos saldos e nas regras; não grava nada</span></div>
+  <div class="chat" id="chatLog">${chat.length?chat.map(m=>`<div class="msg ${m.role==="user"?"u":"a"}">${esc(m.content)}</div>`).join(""):`<div class="empty"><b>Pergunte, por exemplo:</b><div class="row">${["Posso comprar uma impressora?","Posso pagar o almoço da equipe em campo?","Quanto ainda tenho de diárias?"].map(q=>`<button class="btn sm" data-act="perg" data-v="${esc(q)}">${esc(q)}</button>`).join("")}</div></div>`}
   ${chatBusy?`<div class="msg a" id="chatPend"><span class="spinner"></span> Pensando…</div>`:""}</div>
   <div class="composer"><textarea id="chatIn" class="f" rows="2" placeholder="Posso gastar com…?" aria-label="Pergunta"></textarea>
-  ${chatBusy?`<button class="btn" data-act="chatstop">Parar</button>`:`<button class="btn primary" data-act="chatsend"${AI?"":" disabled"}>Enviar</button>`}</div>
+  ${chatBusy?`<button class="btn" data-act="chatstop">Parar</button>`:`<button class="btn primary" data-act="chatsend">Enviar</button>`}</div>
   ${chat.length?`<button class="linkbtn small" data-act="chatlimpar" style="align-self:flex-start">Limpar conversa</button>`:""}</section>`;
 }
 async function enviarChat(){
   const inp=$("#chatIn");const q=inp&&inp.value.trim();if(!q||!AI||chatBusy)return;
   const C=calcular();chat.push({role:"user",content:q});chatBusy=true;chatCtl=new AbortController();renderView();
-  const turns=[{role:"user",content:contextoAssistente(C)},...chat.slice(-12)];
-  try{
-    const {text}=await AI(turns,{cache:false,signal:chatCtl.signal,onText:({text})=>{const p=$("#chatPend");if(p)p.textContent=text}});
-    chat.push({role:"assistant",content:text});
-  }catch(e){if(e&&e.code!=="cancelled")chat.push({role:"assistant",content:(e.text?e.text+"\n\n":"")+"["+msgErro(e)+"]"});else if(e&&e.text)chat.push({role:"assistant",content:e.text+" [interrompido]"});}
+  try{const {text}=await AI([{role:"user",content:contextoAssistente(C)},...chat.slice(-12)],{cache:false,signal:chatCtl.signal,onText:({text})=>{const p=$("#chatPend");if(p)p.textContent=text}});chat.push({role:"assistant",content:text})}
+  catch(e){if(e&&e.code!=="cancelled")chat.push({role:"assistant",content:(e.text?e.text+"\n\n":"")+"["+msgErro(e)+"]"});else if(e&&e.text)chat.push({role:"assistant",content:e.text+" [interrompido]"})}
   chatBusy=false;renderView();
 }
 function viewExport(){
-  const sem=!DL;
-  return `<section class="block"><h2>Relação de despesas (CSV)</h2>
-   <p class="small muted">Uma linha por despesa, agrupada por natureza (custeio e capital) e rubrica, com subtotais, documentos, estado e alertas. Separador ponto e vírgula e vírgula decimal, para abrir direto no Excel. Confira as colunas com o modelo de relação de despesas vigente da FAPEMAT antes de enviar.</p>
-   <div class="row"><button class="btn primary" data-act="csv">Baixar CSV</button></div></section>
-  <section class="block"><h2>Backup JSON</h2>
-   <p class="small muted">Contém todas as despesas, documentos registrados, linhas de extrato e configurações. Não contém imagens.</p>
+  const pronto=S.fase==="ok";
+  return `${pronto?`<section class="block"><h2>Relação de despesas (CSV)</h2>
+   <p class="small muted">Uma linha por despesa, agrupada por natureza e rubrica, com subtotais, documentos, estado e alertas. Separador ponto e vírgula, vírgula decimal, abre direto no Excel. Confira as colunas com o modelo vigente da FAPEMAT antes de enviar.</p>
+   <div class="row"><button class="btn primary" data-act="csv">Baixar CSV</button></div></section>`:""}
+  <section class="block"><h2>Backup completo (JSON)</h2>
+   <p class="small muted">Despesas, documentos registrados, extrato, configuração e plano de trabalho. Sem imagens.</p>
    <div class="row"><button class="btn" data-act="json">Baixar backup JSON</button></div>
-   ${sem?`<div class="banner warn">O download de arquivos não está disponível nesta visualização. Use os botões acima: o conteúdo aparecerá abaixo para copiar.</div>`:""}
    <div id="saida" hidden class="stack"><textarea id="saidaTxt" class="f" rows="8" readonly></textarea><div class="row"><button class="btn sm" data-act="copiar">Copiar</button></div></div></section>
   <section class="block"><h2>Importar backup</h2>
-   <p class="small muted">Escolha um arquivo .json exportado por este app ou cole o conteúdo.</p>
+   <p class="small muted">Arquivo .json exportado por este app, ou cole o conteúdo.</p>
    <input type="file" id="impFile" accept="application/json,.json">
    <textarea id="impTxt" class="f" rows="4" placeholder="ou cole o JSON aqui"></textarea>
-   <div class="row"><label class="check"><input type="radio" name="impModo" value="mesclar" checked> Mesclar (mantém o que existe; substitui registros de mesmo id)</label><label class="check"><input type="radio" name="impModo" value="substituir"> Substituir tudo</label></div>
+   <div class="row"><label class="check"><input type="radio" name="impModo" value="mesclar" checked> Mesclar (substitui registros de mesmo id)</label><label class="check"><input type="radio" name="impModo" value="substituir"> Substituir tudo</label></div>
    <div class="row"><button class="btn" data-act="importar">Importar</button><span id="impMsg" class="small"></span></div></section>
-  <section class="block"><h2>Configuração</h2>
-   <label class="fld"><span>CPF do coordenador (usado para conferir o CPF nas notas fiscais, item 3.8)</span><input type="text" id="cpfCoord" inputmode="numeric" value="${esc(S.perfil.cpf||"")}" placeholder="Não preenchido: o app só verifica se a nota tem algum CPF"></label>
+  ${pronto?`<section class="block"><h2>Configuração</h2>
+   <label class="fld"><span>CPF do coordenador (para conferir o CPF nas notas fiscais, item 3.8)</span><input type="text" id="cpfCoord" inputmode="numeric" value="${esc(S.perfil.cpf||"")}" placeholder="Não preenchido: o app só verifica se a nota tem algum CPF"></label>
    <div class="row"><button class="btn sm" data-act="salvarperfil">Salvar</button></div>
-   <p class="hint">Armazenamento atual: ${{db:"banco persistente do artifact",local:"somente este navegador",memoria:"somente memória da página",carregando:"carregando"}[S.modo]}.</p></section>`;
+   <p class="hint">Armazenamento: ${{firebase:"Firebase (nuvem), conta "+esc(S.user&&S.user.email||""),claude:"banco do artifact no Claude",local:"somente este navegador",memoria:"somente memória da página"}[S.modo]||S.modo}.</p></section>`:`<p><a href="#painel">Voltar</a></p>`}`;
 }
 function csvCell(v){v=v==null?"":String(v);return /[;"\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
 function gerarCSV(){
   const C=calcular();
-  const cab=["Natureza","Rubrica","Item do orçamento","Data","Favorecido","CPF/CNPJ","Documento fiscal","Nº do documento","Data do documento","Descrição","Forma de pagamento","Valor (R$)","Estado","Pendências","Alertas","Justificativas registradas"];
-  const linhas=[cab];
+  const linhas=[["Natureza","Rubrica","Item do orçamento","Data","Favorecido","CPF/CNPJ","Documento fiscal","Nº do documento","Data do documento","Descrição","Forma de pagamento","Valor (R$)","Estado","Pendências","Alertas","Justificativas registradas"]];
   const grupos={};
   for(const d of S.despesas){const it=ITEM[d.itemId];const rub=it?it.rubrica:(TIPOS[d.tipo]&&TIPOS[d.tipo].rubrica)||"sem";(grupos[rub]=grupos[rub]||[]).push(d)}
-  const ordem=[...RUBRICAS.filter(r=>r.natureza==="custeio").map(r=>r.id),"sem",...RUBRICAS.filter(r=>r.natureza==="capital").map(r=>r.id)];
+  const ordem=[...RUBRICAS.filter(r=>r.natureza!=="capital").map(r=>r.id),"sem",...RUBRICAS.filter(r=>r.natureza==="capital").map(r=>r.id)];
   for(const rid of ordem){
     const arr=(grupos[rid]||[]).sort((a,b)=>(a.data||"9").localeCompare(b.data||"9"));if(!arr.length)continue;
     const nat=rid==="sem"?"Custeio":RUB[rid].natureza==="capital"?"Capital":"Custeio";const rn=rid==="sem"?"Sem rubrica":RUB[rid].nome;let sub=0;
     for(const d of arr){
-      const a=C.av.get(d.id);const fiscal=(d.documentos||[]).find(x=>["nf","recibo_pf","recibo_diaria","bilhete","fatura"].includes(x.tipo));
-      sub+=d.valorCentavos||0;
-      linhas.push([nat,rn,ITEM[d.itemId]?ITEM[d.itemId].nome:"",fmtData(d.data).replace("sem data",""),d.favorecido,d.docFavorecido,fiscal?DOCS[fiscal.tipo]:"",fiscal&&fiscal.campos?fiscal.campos.numero:"",fiscal&&fiscal.campos&&fiscal.campos.data?fmtData(fiscal.campos.data):"",d.descricao,FORMAS[d.formaPagamento]||"",numBR(d.valorCentavos),ESTADOS[a.estado],[...a.campos.map(c=>"preencher "+c),...a.faltas.map(t=>DOCS[t])].join(" | "),[...a.erros,...a.cinzas].map(e=>`${e.norma}: ${e.msg}`).join(" | "),[...Object.entries(d.dispensas||{}).map(([k,v])=>`${k}: ${v.justificativa}`),d.autorizacaoFapemat?"FAPEMAT: "+d.autorizacaoFapemat:"",d.justificativaSaque?"Saque: "+d.justificativaSaque:""].filter(Boolean).join(" | ")]);
+      const a=C.av.get(d.id);const fiscal=(d.documentos||[]).find(x=>["nf","recibo_pf","recibo_diaria","bilhete","fatura"].includes(x.tipo));sub+=d.valorCentavos||0;
+      linhas.push([nat,rn,ITEM[d.itemId]?ITEM[d.itemId].nome:"",d.data?fmtData(d.data):"",d.favorecido,d.docFavorecido,fiscal?DOCS[fiscal.tipo]:"",fiscal&&fiscal.campos?fiscal.campos.numero:"",fiscal&&fiscal.campos&&fiscal.campos.data?fmtData(fiscal.campos.data):"",d.descricao,FORMAS[d.formaPagamento]||"",numBR(d.valorCentavos),ESTADOS[a.estado],[...a.campos.map(c=>"preencher "+c),...a.faltas.map(t=>DOCS[t])].join(" | "),[...a.erros,...a.cinzas].map(e=>`${e.norma}: ${e.msg}`).join(" | "),[...Object.entries(d.dispensas||{}).map(([k,v])=>`${k}: ${v.justificativa}`),d.autorizacaoFapemat?"FAPEMAT: "+d.autorizacaoFapemat:"",d.justificativaSaque?"Saque: "+d.justificativaSaque:""].filter(Boolean).join(" | ")]);
     }
     linhas.push(["","Subtotal "+rn,"","","","","","","","","",numBR(sub),"","","",""]);
   }
-  const tot=S.despesas.reduce((s,d)=>s+(d.valorCentavos||0),0);
-  linhas.push(["","Total geral","","","","","","","","","",numBR(tot),"","","",""]);
-  return "﻿"+`Processo;${PROJ.processo}\nProjeto;${csvCell(PROJ.nome)}\nCoordenador;${PROJ.coord}\nGerado em;${fmtData(hojeISO())}\n\n`+linhas.map(l=>l.map(csvCell).join(";")).join("\r\n");
+  linhas.push(["","Total geral","","","","","","","","","",numBR(S.despesas.reduce((s,d)=>s+(d.valorCentavos||0),0)),"","","",""]);
+  return "﻿"+`Processo;${csvCell(PROJ.processo)}\nProjeto;${csvCell(PROJ.nome)}\nCoordenador;${csvCell(PROJ.coord)}\nGerado em;${fmtData(hojeISO())}\n\n`+linhas.map(l=>l.map(csvCell).join(";")).join("\r\n");
 }
-function gerarJSON(){return JSON.stringify({app:"prestacao-fapemat",versao:1,processo:PROJ.processo,exportadoEm:new Date().toISOString(),despesas:S.despesas,extrato:S.extrato,perfil:S.perfil},null,2)}
+function gerarJSON(){return JSON.stringify({app:"prestacao-fapemat",versao:2,exportadoEm:new Date().toISOString(),despesas:S.despesas,extrato:S.extrato,perfil:S.perfil,plano:S.plano},null,2)}
+function baixarNavegador(nome,conteudo){try{const url=URL.createObjectURL(new Blob([conteudo],{type:nome.endsWith(".csv")?"text/csv;charset=utf-8":"application/json"}));const a=document.createElement("a");a.href=url;a.download=nome;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);return true}catch(e){return false}}
 async function baixar(nome,conteudo){
-  if(DL){try{await DL.save({filename:nome,data:conteudo});toast("Arquivo salvo.");return}catch(e){if(e&&e.code==="declined")return;toast("Download indisponível ("+(e&&e.code)+"). Copie o conteúdo abaixo.")}}
-  const box=$("#saida");if(box){box.hidden=false;$("#saidaTxt").value=conteudo}
+  if(DL){try{await DL.save({filename:nome,data:conteudo});toast("Arquivo salvo.");return}catch(e){if(e&&e.code==="declined")return}}
+  else if(S.modo!=="claude"&&baixarNavegador(nome,conteudo)){toast("Download iniciado.");return}
+  const box=$("#saida");if(box){box.hidden=false;$("#saidaTxt").value=conteudo;toast("Copie o conteúdo abaixo.")}
 }
 async function importar(){
   const msg=$("#impMsg");let txt=$("#impTxt").value.trim();const f=$("#impFile").files[0];
   if(!txt&&f)txt=await f.text();
   if(!txt){msg.textContent="Escolha um arquivo ou cole o JSON.";return}
   let o;try{o=JSON.parse(txt)}catch(e){msg.textContent="O conteúdo não é um JSON válido.";return}
-  if(!o||!Array.isArray(o.despesas)){msg.textContent="Este JSON não é um backup deste app (falta a lista de despesas).";return}
+  if(!o||!Array.isArray(o.despesas)){msg.textContent="Este JSON não é um backup deste app.";return}
   const modo=(document.querySelector('[name="impModo"]:checked')||{}).value;
   if(modo==="substituir"&&!importar.ok){importar.ok=true;msg.innerHTML='<b style="color:var(--bad)">Isto apaga as despesas atuais que não estão no backup. Clique Importar de novo para confirmar.</b>';return}
   importar.ok=false;msg.textContent="Importando…";
@@ -1053,18 +1152,53 @@ async function importar(){
     if(modo==="substituir"){const ids=new Set(o.despesas.map(d=>d.id)),eids=new Set((o.extrato||[]).map(l=>l.id));for(const d of[...S.despesas])if(!ids.has(d.id))await remove("despesas",d.id);for(const l of[...S.extrato])if(!eids.has(l.id))await remove("extrato",l.id)}
     for(const d of o.despesas)if(d&&d.id)await persist("despesas",d);
     for(const l of(o.extrato||[]))if(l&&l.id)await persist("extrato",l);
-    if(o.perfil)await persist("perfil",o.perfil);
+    if(o.perfil)await persist("config",Object.assign({},o.perfil,{id:"perfil"}));
+    if(o.plano&&!validarPlano(o.plano).length)await persist("config",{id:"plano",plano:o.plano});
     msg.textContent=`Importado: ${o.despesas.length} despesa(s), ${(o.extrato||[]).length} linha(s) de extrato.`;
-  }catch(e){msg.textContent="A importação parou no meio. Confira os dados e importe de novo."}
+  }catch(e){msg.textContent="A importação parou no meio. Confira e importe de novo."}
+}
+function viewLogin(){
+  return `<div class="gate"><div class="card"><div class="logo">PC</div><h1>Prestação de contas</h1><p class="muted">Entre com a sua conta Google. Os dados ficam no Firebase, numa pasta que só a sua conta pode ler e gravar.</p><button class="btn primary" data-act="login">Entrar com Google</button><p class="hint">Nenhum dado do projeto fica no código público deste site.</p></div></div>`;
+}
+function viewSemPlano(){
+  return `<div class="gate"><div class="card"><div class="logo">PC</div><h1>Carregue o plano de trabalho</h1><p class="muted">Primeiro acesso nesta conta. Envie o arquivo <b>plano-de-trabalho.json</b> (orçamento, equipe e prazos). Ele fica guardado só no seu banco.</p>
+  <input type="file" id="planoFile" accept="application/json,.json"><textarea id="planoTxt" class="f" rows="4" placeholder="ou cole o conteúdo do arquivo aqui"></textarea>
+  <div class="row"><button class="btn primary" data-act="salvarplano">Salvar plano</button><span id="planoMsg" class="small"></span></div>
+  <p class="hint">Tem um backup completo? Ele também contém o plano: <a href="#exportar">importar backup</a>.</p></div></div>`;
+}
+async function salvarPlano(){
+  const msg=$("#planoMsg");let txt=$("#planoTxt").value.trim();const f=$("#planoFile").files[0];
+  if(!txt&&f)txt=await f.text();
+  if(!txt){msg.textContent="Escolha o arquivo.";return}
+  let o;try{o=JSON.parse(txt)}catch(e){msg.textContent="Arquivo não é JSON válido.";return}
+  if(o&&o.plano&&Array.isArray(o.despesas))o=o.plano;
+  const e=validarPlano(o);if(e.length){msg.textContent="Plano inválido: "+e.slice(0,3).join("; ");return}
+  msg.textContent="Salvando…";
+  try{await persist("config",{id:"plano",plano:o});msg.textContent="Plano salvo."}catch(_){msg.textContent="Não foi possível salvar."}
 }
 
 /* ================= RENDER ================= */
+function renderShell(){
+  const app=$("#appArea");
+  if(S.fase==="ok"){app.hidden=false;renderView();return}
+  app.hidden=true;
+  $("#view").innerHTML=S.fase==="login"?viewLogin():S.fase==="semplano"?(TAB==="exportar"?viewExport():viewSemPlano()):`<div class="empty"><span><span class="spinner"></span> Carregando seus dados…</span></div>`;
+}
 function renderView(){
+  if(S.fase!=="ok"){renderShell();return}
   const v=$("#view");const C=calcular();
+  $("#heroSlot").innerHTML=hero(C);
   document.querySelectorAll("#tabs a").forEach(a=>{if(a.dataset.tab===TAB)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
   const chatVal=$("#chatIn")&&$("#chatIn").value;
-  v.innerHTML=!S.pronto&&S.modo==="carregando"?`<div class="empty"><span><span class="spinner"></span> Carregando dados…</span></div>`:TAB==="painel"?viewPainel(C):TAB==="lancamentos"?viewLanc(C):TAB==="orcamento"?viewOrc(C):TAB==="assistente"?viewAssist():viewExport();
+  v.innerHTML=TAB==="painel"?viewPainel(C):TAB==="lancamentos"?viewLanc(C):TAB==="orcamento"?viewOrc(C):TAB==="assistente"?viewAssist():viewExport();
+  v.classList.toggle("anim",TAB!==TAB_ANT);TAB_ANT=TAB;
   if(TAB==="assistente"){const c=$("#chatIn");if(c&&chatVal)c.value=chatVal}
+  animarNumeros(document.body);
+  aiHint();
+}
+function aiHint(){
+  $("#attachBtn").hidden=!IMG;
+  $("#aiHint").textContent=AI?(IMG?"O Claude lê o texto ou a foto e mostra os campos para você conferir. Nada é gravado sem o seu Confirmar.":"O Claude lê o texto e mostra os campos para conferir. Fotos indisponíveis nesta visualização."):AI_STATE==="carregando"?"":"Sem IA aqui: o app copia do seu texto só o que está escrito (valor, data, item) e você confere antes de salvar.";
 }
 let pendRender=false;
 function renderAll(){
@@ -1073,7 +1207,7 @@ function renderAll(){
   renderView();
 }
 document.addEventListener("focusout",()=>setTimeout(()=>{if(pendRender){const a=document.activeElement;if(!(a&&$("#view").contains(a)&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))){pendRender=false;renderView()}}},150));
-function rota(){const h=location.hash.slice(1);TAB=["painel","lancamentos","orcamento","assistente","exportar"].includes(h)?h:"painel";renderView()}
+function rota(){const h=location.hash.slice(1);TAB=["painel","lancamentos","orcamento","assistente","exportar"].includes(h)?h:"painel";renderShell()}
 window.addEventListener("hashchange",rota);
 
 /* ================= EVENTOS ================= */
@@ -1082,70 +1216,72 @@ $("#entrada").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.ctrlKey||e.m
 $("#foto").addEventListener("change",e=>{fileSel=e.target.files[0]||null;renderFileChip()});
 document.addEventListener("change",e=>{
   const t=e.target;const box=t.closest(".grid");
-  if(box&&t.name==="tipo"){box.querySelectorAll(".viag").forEach(x=>x.classList.toggle("hide",!(t.value==="diaria"||t.value==="passagem")));box.querySelectorAll(".viag-d").forEach(x=>x.classList.toggle("hide",t.value!=="diaria"));const s=box.querySelector('[name="itemId"]');if(s){const cur=s.value;s.innerHTML=optItens(cur,t.value)}}
+  if(box&&t.name==="tipo"){box.querySelectorAll(".viag").forEach(x=>x.classList.toggle("hide",!(t.value==="diaria"||t.value==="passagem")));box.querySelectorAll(".viag-d").forEach(x=>x.classList.toggle("hide",t.value!=="diaria"));const s=box.querySelector('[name="itemId"]');if(s)s.innerHTML=optItens(s.value,t.value)}
   if(box&&t.name==="formaPagamento")box.querySelectorAll(".saque").forEach(x=>x.classList.toggle("hide",t.value!=="saque"));
-  if(t.name==="tipoDoc"){const dr=drafts.find(x=>x.id===t.closest("[data-draft]")?.dataset.draft);if(dr){syncDraft(dr);renderDrafts()}}
+  if(t.name==="tipoDoc"){const card=t.closest("[data-draft]");const dr=card&&drafts.find(x=>x.id===card.dataset.draft);if(dr){syncDraft(dr);renderDrafts()}}
   if(t.name&&t.name.startsWith("vinc-")){const dr=drafts.find(x=>"vinc-"+x.id===t.name);if(dr){syncDraft(dr);renderDrafts()}}
-  if(t.id==="fEstado"){UI.filtroEstado=t.value;renderView()}
   if(t.id==="fRub"){UI.filtroRub=t.value;renderView()}
 });
 document.addEventListener("input",e=>{if(e.target.id==="fBusca"){UI.busca=e.target.value;const pos=e.target.selectionStart;renderView();const f=$("#fBusca");f.focus();f.setSelectionRange(pos,pos)}});
 document.addEventListener("keydown",e=>{if(e.target.id==="chatIn"&&e.key==="Enter"&&!e.shiftKey){e.preventDefault();enviarChat()}});
 document.addEventListener("click",async e=>{
   const b=e.target.closest("[data-act]");if(!b)return;
-  const act=b.dataset.act,id=b.dataset.id;const dr=drafts.find(x=>x.id===id);
-  const desp=S.despesas.find(x=>x.id===id);
+  const act=b.dataset.act,id=b.dataset.id;const dr=drafts.find(x=>x.id===id);const desp=S.despesas.find(x=>x.id===id);
   switch(act){
+    case"login":entrarGoogle();break;
+    case"sair":if(FB)FB.auth.signOut();break;
+    case"salvarplano":salvarPlano();break;
     case"clearfile":fileSel=null;docAlvo=null;$("#foto").value="";renderFileChip();break;
     case"descartar":if(dr){dr.ctl&&dr.ctl.abort();drafts=drafts.filter(x=>x!==dr);renderDrafts()}break;
-    case"parar":if(dr){dr.ctl.abort()}break;
+    case"parar":if(dr)dr.ctl.abort();break;
     case"corrigir":if(dr){syncDraft(dr);dr.editando=true;renderDrafts()}break;
     case"confirmar":if(dr){b.disabled=true;await confirmarDraft(dr);b.disabled=false}break;
     case"usardata":if(dr){syncDraft(dr);dr.desp.data=b.dataset.v;dr.desp.dataParcial=null;dr.dups=duplicatasDe(dr.desp);renderDrafts()}break;
     case"filtrar":UI.filtroEstado=b.dataset.v;location.hash="#lancamentos";break;
+    case"festado":UI.filtroEstado=b.dataset.v;renderView();break;
     case"abrir":UI.aberto=UI.aberto===id?null:id;UI.confirmDel=null;renderView();break;
     case"novadesp":{const d=novaDespesa({},"manual");await persist("despesas",d);UI.aberto=d.id;UI.filtroEstado="";UI.filtroRub="";UI.busca="";renderView();break}
     case"salvar":if(desp){const f=document.querySelector(`.editform[data-id="${id}"]`);const v=lerDespesa(f);const fa=document.querySelector(`[data-fapemat="${id}"]`);const m=Object.assign({},desp,v,{atualizadoEm:new Date().toISOString()});if(fa)m.autorizacaoFapemat=fa.value.trim();await persist("despesas",m);toast("Alterações salvas.")}break;
     case"pedirdel":UI.confirmDel=id;renderView();break;
     case"cancelardel":UI.confirmDel=null;renderView();break;
     case"excluir":if(desp){for(const l of linhasDe(desp))await persist("extrato",Object.assign({},l,{despesaId:null}));await remove("despesas",id);UI.aberto=null;UI.confirmDel=null;toast("Despesa excluída.")}break;
-    case"remdoc":if(desp){await persist("despesas",Object.assign({},desp,{documentos:(desp.documentos||[]).filter(x=>x.id!==b.dataset.doc)}))}break;
+    case"remdoc":if(desp)await persist("despesas",Object.assign({},desp,{documentos:(desp.documentos||[]).filter(x=>x.id!==b.dataset.doc)}));break;
     case"desconciliar":{const l=S.extrato.find(x=>x.id===id);if(l)await persist("extrato",Object.assign({},l,{despesaId:null}));break}
-    case"parentesco":if(desp){await persist("despesas",Object.assign({},desp,{parentesco:{fav:norm(desp.favorecido),resposta:b.dataset.v,em:new Date().toISOString()}}))}break;
+    case"parentesco":if(desp)await persist("despesas",Object.assign({},desp,{parentesco:{fav:norm(desp.favorecido),resposta:b.dataset.v,em:new Date().toISOString()}}));break;
     case"dispensar":if(desp){const inp=document.querySelector(`[data-just="${id}|${b.dataset.cod}"]`);const j=inp&&inp.value.trim();if(!j){toast("Escreva a justificativa antes de registrar.");inp&&inp.focus();return}await persist("despesas",Object.assign({},desp,{dispensas:Object.assign({},desp.dispensas,{[b.dataset.cod]:{justificativa:j,em:new Date().toISOString()}})}))}break;
-    case"anexardoc":docAlvo=id;if(!IMG){abrirManual(id,b.dataset.t);break}window.scrollTo({top:0,behavior:"smooth"});$("#entrada").placeholder=`Foto do documento (${DOCS[b.dataset.t]}). Escreva uma observação se quiser.`;$("#foto").click();renderFileChip();break;
+    case"anexardoc":docAlvo=id;if(!IMG){abrirManual(id,b.dataset.t);break}window.scrollTo({top:0,behavior:"smooth"});$("#foto").click();renderFileChip();break;
     case"docmanual":abrirManual(id,"nf");break;
     case"perg":{const c=$("#chatIn");if(c){c.value=b.dataset.v;enviarChat()}break}
     case"chatsend":enviarChat();break;
     case"chatstop":chatCtl&&chatCtl.abort();break;
     case"chatlimpar":chat=[];renderView();break;
-    case"csv":baixar(`relacao-despesas-${PROJ.processo.replace(/[^\w]/g,"-")}-${hojeISO()}.csv`,gerarCSV());break;
+    case"csv":baixar(`relacao-despesas-${hojeISO()}.csv`,gerarCSV());break;
     case"json":baixar(`backup-prestacao-${hojeISO()}.json`,gerarJSON());break;
     case"copiar":{const t=$("#saidaTxt");try{await navigator.clipboard.writeText(t.value);toast("Copiado.")}catch(_){t.select();toast("Selecionado. Use copiar do sistema.")}break}
     case"importar":importar();break;
-    case"salvarperfil":await persist("perfil",Object.assign({},S.perfil,{cpf:$("#cpfCoord").value.trim()}));toast("Configuração salva.");break;
+    case"salvarperfil":await persist("config",Object.assign({},S.perfil,{id:"perfil",cpf:$("#cpfCoord").value.trim()}));toast("Configuração salva.");break;
   }
 });
 function abrirManual(despId,tipo){
   const d=S.despesas.find(x=>x.id===despId);
-  const dr={id:uid(),kind:"manual",status:"pronto",editando:true,tipoDoc:tipo,arquivo:null,campos:{numero:"",data:"",valorCentavos:null,emitente:"",emitenteDoc:"",destinatarioNome:"",destinatarioCpf:"",processoTexto:"",descricaoItens:""},cands:d?[{d,sc:100}]:[],vinculo:despId||"nova"};
-  drafts.unshift(dr);renderDrafts();window.scrollTo({top:0,behavior:"smooth"});
+  drafts.unshift({id:uid(),kind:"manual",status:"pronto",editando:true,tipoDoc:tipo,arquivo:null,campos:{numero:"",data:"",valorCentavos:null,emitente:"",emitenteDoc:"",destinatarioNome:"",destinatarioCpf:"",processoTexto:"",descricaoItens:""},cands:d?[{d,sc:100}]:[],vinculo:despId||"nova"});
+  renderDrafts();window.scrollTo({top:0,behavior:"smooth"});
 }
 
 /* ================= INÍCIO ================= */
 rota();
 (function boot(){
   const use=window.claude&&typeof window.claude.use==="function"?window.claude.use.bind(window.claude):null;
-  if(!use){startLocal("Esta página está aberta fora do Claude.");AI_STATE="indisponivel";$("#aiHint").textContent="O Claude não está disponível fora do Claude. Cadastre despesas manualmente em Lançamentos.";$("#attachBtn").hidden=true;return}
-  use("db").then(db=>db?startDb(db):startLocal("O banco do artifact não respondeu nesta visualização.")).catch(()=>startLocal("O banco do artifact falhou ao carregar."));
-  use("sample").then(async s=>{
-    AI=s;AI_STATE=s?"ok":"indisponivel";
-    if(s){const l=await s.limits().catch(()=>null);IMG=!!(l&&l.images)}
-    $("#attachBtn").hidden=!IMG;
-    $("#aiHint").textContent=!s?"O Claude não está disponível nesta visualização. Cadastre despesas manualmente em Lançamentos.":IMG?"A IA lê o texto ou a foto e mostra os campos para você conferir. Nada é gravado sem o seu Confirmar. Extrato longo: fotografe em partes.":"A IA lê o texto e mostra os campos para você conferir. Envio de fotos indisponível nesta visualização.";
-    renderView();
-  }).catch(()=>{AI_STATE="indisponivel";renderView()});
-  use("downloads").then(d=>{DL=d;if(TAB==="exportar")renderView()}).catch(()=>{});
+  if(use){
+    use("db").then(db=>db?startClaudeDb(db):startLocal("O banco do artifact não respondeu.")).catch(()=>startLocal("O banco do artifact falhou ao carregar."));
+    use("sample").then(async s=>{AI=s;AI_STATE=s?"ok":"indisponivel";if(s){const l=await s.limits().catch(()=>null);IMG=!!(l&&l.images)}if(S.fase==="ok")renderView()}).catch(()=>{AI_STATE="indisponivel"});
+    use("downloads").then(d=>{DL=d}).catch(()=>{});
+    return;
+  }
+  AI_STATE="indisponivel";
+  const cfg=window.FIREBASE_CONFIG;
+  if(cfg&&cfg.apiKey&&cfg.projectId)startFirebase(cfg);
+  else startLocal("O Firebase ainda não foi configurado (arquivo firebase-config.js).");
 })();
 </script>
 

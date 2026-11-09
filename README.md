@@ -1,25 +1,21 @@
 # presta-conta-fapemat
 
-App de prestação de contas do projeto **Transforma-ações: Integrando Saberes para ações sustentáveis**
-(processo FAPEMAT-PRO.0002209/2025, RN FAPEMAT 008/2021). Uso pessoal do coordenador.
+App web de prestação de contas para projetos financiados pela FAPEMAT (RN 008/2021).
 
-## O que faz
-- Registro de gastos por texto livre ou foto (nota, recibo, bilhete, extrato), com cartão de confirmação: nada é gravado sem confirmar.
-- Validações da norma feitas em código (vigência, item 3.8, saldo por item, capital × custeio, equipe e parentesco, diárias, vedações do item 3.13, item 3.4.1).
-- Estados: pendente, comprovada, irregular, a confirmar com a FAPEMAT.
-- Painel de saldos por rubrica, orçamento item a item, prazos, assistente e exportação CSV/JSON.
+O código não contém dados de projeto. Orçamento, equipe, prazos e despesas ficam no banco de cada usuário:
 
-## Onde roda
-O arquivo `index.html` foi feito para rodar como **artifact do Claude** (claude.ai), que fornece:
-- `db`: armazenamento persistente;
-- `sample`: leitura de texto e imagem pela IA, sem chave de API;
-- `downloads`: salvar CSV e JSON.
+- **No GitHub Pages:** Firebase (login Google + Firestore). Cada conta só acessa `users/{uid}/…`, conforme `firestore.rules`.
+- **Dentro do Claude (artifact):** banco do próprio artifact, com leitura de texto e foto pela IA.
+- **Sem nenhum dos dois:** navegador (localStorage), com aviso na tela.
 
-Aberto fora do Claude (arquivo local ou GitHub Pages), o app funciona em modo reduzido:
-sem IA, com os dados guardados só no `localStorage` do navegador, e avisa isso na tela.
-Nesse modo, faça backup JSON com frequência.
+No primeiro acesso, o app pede o arquivo `plano-de-trabalho.json` (formato `plano-fapemat-v1`), que não fica neste repositório.
 
-## Limitações conhecidas
-- Imagens são reduzidas pela plataforma a ~1,2 megapixel; fotografe extratos longos em partes. PDF não é aceito.
-- Vedações por palavra-chave podem gerar falso positivo; o app permite dispensar esses alertas com justificativa registrada.
-- O CSV não é o formulário oficial da FAPEMAT; confira as colunas com o modelo vigente.
+## Configurar o Firebase
+1. Crie um projeto em console.firebase.google.com.
+2. Authentication → Sign-in method → ative **Google**. Em Settings → Authorized domains, adicione o domínio do GitHub Pages.
+3. Firestore Database → criar banco em modo de produção.
+4. Firestore → Rules → cole o conteúdo de `firestore.rules` → Publicar.
+5. Configurações do projeto → Seus apps → Web → copie o `firebaseConfig` para `firebase-config.js`.
+
+## Validações
+Feitas em código, nunca pela IA: vigência, item 3.8, saldo por item, capital × custeio, equipe e parentesco, diárias, vedações do item 3.13 e item 3.4.1.
